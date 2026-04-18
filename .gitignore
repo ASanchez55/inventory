@@ -138,6 +138,12 @@ ENV/
 env.bak/
 venv.bak/
 
+# Secrets
+.env.local
+.env.*.local
+secrets.json
+secrets.py
+
 # Spyder project settings
 .spyderproject
 .spyproject
