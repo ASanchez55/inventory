@@ -63,6 +63,9 @@
             <a href="{% url 'password_reset' %}" class="text-link">Forgot your password?</a>
         </div>
 
+        <div class="text-center mt-3">
+            <p>Don't have an account? <a href="{% url 'users:register' %}" class="text-link">Sign up</a></p>
+        </div>
     </form>
 </div>
 {% endblock %}
