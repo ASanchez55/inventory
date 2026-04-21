@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login - Inventory System{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 400px; margin: 2rem auto;">
+    <h2 class="text-center mb-4">Login to Your Account</h2>
+
+    {% if form.errors %}
+    <div class="alert alert-error mb-4">
+        <strong>Error:</strong> Please correct the errors below.
+    </div>
+    {% endif %}
+
+    {% if next %}
+    {% if user.is_authenticated %}
+    <div class="alert alert-info mb-4">
+        Your account doesn't have access to this page. To proceed,
+        please login with an account that has access.
+    </div>
+    {% else %}
+    <div class="alert alert-info mb-4">
+        Please login to see this page.
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <form method="post" class="login-form">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="{{ form.username.id_for_label }}">Username</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+            <div class="error-message">
+                {{ form.username.errors.0 }}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.password.id_for_label }}">Password</label>
+            {{ form.password }}
+            {% if form.password.errors %}
+            <div class="error-message">
+                {{ form.password.errors.0 }}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label class="checkbox-label">
+                <input type="checkbox" name="remember" id="remember">
+                <span class="checkmark"></span>
+                Remember me
+            </label>
+        </div>
+
+        <button type="submit" class="btn" style="width: 100%;">Login</button>
+
+        <div class="text-center mt-3">
+            <a href="{% url 'password_reset' %}" class="text-link">Forgot your password?</a>
+        </div>
+
+        <div class="text-center mt-3">
+            <p>Don't have an account? <a href="{% url 'users:register' %}" class="text-link">Sign up</a></p>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-form input[type="text"],
+    .login-form input[type="password"] {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e9ecef;
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .login-form input[type="text"]:focus,
+    .login-form input[type="password"]:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        font-weight: normal;
+        margin-bottom: 0;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+        margin-right: 0.5rem;
+    }
+
+    .text-link {
+        color: #667eea;
+        text-decoration: none;
+    }
+
+    .text-link:hover {
+        text-decoration: underline;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 5px;
+        margin-bottom: 1rem;
+    }
+
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .alert-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+
+    .error-message {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
