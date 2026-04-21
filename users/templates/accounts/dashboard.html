@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Inventory System{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Welcome, {{ user.username }}!</h2>
+    <p>You are successfully logged in to the Inventory Management System.</p>
+
+    <div class="mt-4">
+        <!-- remove the  # later -->
+        <a href="{#% url 'products:list' %#}" class="btn">Manage Products</a>
+        <a href="{#% url 'inventory:list' %#}" class="btn btn-secondary">View Inventory</a>
+    </div>
+</div>
+{% endblock %}
