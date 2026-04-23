@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Brands{% endblock %}
+
+{% block content %}
+<section>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
+        <div>
+            <h2>Brands</h2>
+            <p>Manage product brands from one place.</p>
+        </div>
+        <a href="{% url 'products:brand_add' %}">Add Brand</a>
+    </div>
+
+    {% if brands %}
+    <table style="width:100%;border-collapse:collapse;margin-top:1.5rem;">
+        <thead>
+            <tr>
+                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Name</th>
+                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for brand in brands %}
+            <tr>
+                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ brand.name }}</td>
+                <td style="padding:0.75rem;border-bottom:1px solid #eee;">
+                    <a href="{% url 'products:brand_edit' brand.pk %}">Edit</a>
+                    <a href="{% url 'products:brand_delete' brand.pk %}" style="margin-left:1rem;">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No brands have been added yet.</p>
+    {% endif %}
+</section>
+{% endblock %}
