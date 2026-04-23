@@ -2,8 +2,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import BrandForm, CategoryForm
-from .models import Category, Brand
+from .forms import BrandForm, CategoryForm, ProductForm
+from .models import Category, Brand, Product
+
+# Category views
 
 
 @login_required
@@ -75,6 +77,7 @@ def category_delete(request, pk):
     )
 
 
+# Brand views
 @login_required
 def brand_list(request):
     brands = Brand.objects.order_by('name')
@@ -141,4 +144,75 @@ def brand_delete(request, pk):
         request,
         'products/brand_confirm_delete.html',
         {'brand': brand},
+    )
+
+# product views
+
+
+@login_required
+def product_list(request):
+    products = Product.objects.order_by('name')
+    return render(request, 'products/product_list.html', {'products': products})
+
+
+@login_required
+def product_create(request):
+    if request.method == 'POST':
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Product added successfully.')
+            return redirect('products:product_list')
+    else:
+        form = ProductForm()
+
+    return render(
+        request,
+        'products/product_form.html',
+        {
+            'form': form,
+            'page_title': 'Add Product',
+            'button_label': 'Save Product',
+        },
+    )
+
+
+@login_required
+def product_update(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+
+    if request.method == 'POST':
+        form = ProductForm(request.POST, instance=product)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Product updated successfully.')
+            return redirect('products:product_list')
+    else:
+        form = ProductForm(instance=product)
+
+    return render(
+        request,
+        'products/product_form.html',
+        {
+            'form': form,
+            'product': product,
+            'page_title': 'Edit Product',
+            'button_label': 'Update Product',
+        },
+    )
+
+
+@login_required
+def product_delete(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+
+    if request.method == 'POST':
+        product.delete()
+        messages.success(request, 'Product deleted successfully.')
+        return redirect('products:product_list')
+
+    return render(
+        request,
+        'products/product_confirm_delete.html',
+        {'product': product},
     )

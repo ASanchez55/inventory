@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Products{% endblock %}
+
+{% block content %}
+<section>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
+        <div>
+            <h2>Products</h2>
+            <p>Manage products from one place.</p>
+        </div>
+        <a href="{% url 'products:product_add' %}">Add Product</a>
+    </div>
+
+    {% if products %}
+    <table style="width:100%;border-collapse:collapse;margin-top:1.5rem;">
+        <thead>
+            <tr>
+                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Name</th>
+                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">SKU</th>
+                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Category</th>
+                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Brand</th>
+                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Price</th>
+                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ product.name }}</td>
+                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ product.sku }}</td>
+                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ product.category }}</td>
+                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ product.brand }}</td>
+                <td style="padding:0.75rem;border-bottom:1px solid #eee;">${{ product.price|floatformat:2 }}</td>
+                <td style="padding:0.75rem;border-bottom:1px solid #eee;">
+                    <a href="{% url 'products:product_edit' product.pk %}">Edit</a>
+                    <a href="{% url 'products:product_delete' product.pk %}" style="margin-left:1rem;">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No products have been added yet.</p>
+    {% endif %}
+</section>
+{% endblock %}
