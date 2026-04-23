@@ -24,6 +24,7 @@
                 <!-- remove # after adding URLs -->
                 {% if user.is_authenticated %}
                 <li><a href="{% url 'users:dashboard' %}">Dashboard</a></li>
+                <li><a href="{% url 'products:brand_list' %}">Brands</a></li>
                 <li><a href="{% url 'products:category_list' %}">Categories</a></li>
                 <li><a href="{#% url 'inventory:list' %#}">Inventory</a></li>
                 <li><a href="{#% url 'users:list' %#}">Users</a></li>
