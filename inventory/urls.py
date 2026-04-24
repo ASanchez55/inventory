@@ -44,4 +44,6 @@ urlpatterns = [
     # Include users app URLs
     path('users/', include('users.urls')),
     path('products/', include('products.urls')),
+    path('inventory_management/', include('inventory_app.urls')),
+
 ]
