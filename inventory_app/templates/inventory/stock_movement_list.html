@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Inventory{% endblock %}
+
+{% block content %}
+<section>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
+        <div>
+            <h2>Stock Movements</h2>
+
+        </div>
+
+    </div>
+
+    {% if movements %}
+    <table style="width:100%;border-collapse:collapse;margin-top:1.5rem;">
+        <thead>
+            <tr>
+                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Product</th>
+                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">SKU</th>
+                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Type</th>
+                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Quantity</th>
+                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Reference</th>
+                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">User</th>
+                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Date</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in movements %}
+            <tr>
+                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ item.product.name }}</td>
+                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ item.product.sku }}</td>
+                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ item.movement_type }}</td>
+                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ item.quantity }}</td>
+                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ item.reference }}</td>
+                <td style="padding:0.75rem;border-bottom:1px solid #eee;">
+                    {% if item.user %}
+                    {{ item.user.get_full_name|default:item.user.username }}
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ item.created_at }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No stock movements found.</p>
+    {% endif %}
+</section>
+{% endblock %}
