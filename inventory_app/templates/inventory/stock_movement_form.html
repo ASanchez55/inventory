@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section style="max-width:32rem;">
+    <h2>{{ page_title }}</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div>
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <div style="margin-bottom:1rem;">
+            <label for="{{ form.quantity.id_for_label }}">Quantity</label>
+            {{ form.quantity }}
+            {% if form.quantity.errors %}
+            <div>
+                {{ form.quantity.errors }}
+            </div>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom:1rem;">
+            <label for="{{ form.reference.id_for_label }}">Reference</label>
+            {{ form.reference }}
+            {% if form.reference.errors %}
+            <div>
+                {{ form.reference.errors }}
+            </div>
+            {% endif %}
+        </div>
+
+        <button type="submit">{{ button_label }}</button>
+        <a href="{% url 'inventory_app:inventory_list' %}" style="margin-left:1rem;">Cancel</a>
+    </form>
+</section>
+{% endblock %}

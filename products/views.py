@@ -5,6 +5,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .forms import BrandForm, CategoryForm, ProductForm
 from .models import Category, Brand, Product
 
+from products.services import create_product
+
 # Category views
 
 
@@ -160,7 +162,13 @@ def product_create(request):
     if request.method == 'POST':
         form = ProductForm(request.POST)
         if form.is_valid():
-            form.save()
+            create_product(
+                name=form.cleaned_data['name'],
+                sku=form.cleaned_data['sku'],
+                category=form.cleaned_data['category'],
+                brand=form.cleaned_data['brand'],
+                price=form.cleaned_data['price'],
+            )
             messages.success(request, 'Product added successfully.')
             return redirect('products:product_list')
     else:
