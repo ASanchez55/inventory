@@ -7,6 +7,9 @@ from .models import Category, Brand, Product
 
 from products.services import create_product
 
+from django.core.paginator import Paginator
+from django.db.models import Q
+
 # Category views
 
 
@@ -153,8 +156,49 @@ def brand_delete(request, pk):
 
 @login_required
 def product_list(request):
-    products = Product.objects.order_by('name')
-    return render(request, 'products/product_list.html', {'products': products})
+    search = request.GET.get('search', '').strip()
+    category_id = request.GET.get('category', '').strip()
+    brand_id = request.GET.get('brand', '').strip()
+    selected_category_id = int(category_id) if category_id.isdigit() else None
+    selected_brand_id = int(brand_id) if brand_id.isdigit() else None
+
+    products = Product.objects.select_related(
+        'category', 'brand').order_by('name')
+
+    if search:
+        products = products.filter(
+            Q(name__icontains=search) |
+            Q(sku__icontains=search)
+        )
+
+    if category_id:
+        products = products.filter(category_id=category_id)
+
+    if brand_id:
+        products = products.filter(brand_id=brand_id)
+
+    paginator = Paginator(products, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    categories = Category.objects.order_by('name')
+    brands = Brand.objects.order_by('name')
+
+    return render(
+        request,
+        'products/product_list.html',
+        {
+            'page_obj': page_obj,
+            'products': page_obj,
+            'categories': categories,
+            'brands': brands,
+            'search': search,
+            'selected_category': category_id,
+            'selected_brand': brand_id,
+            'selected_category_id': selected_category_id,
+            'selected_brand_id': selected_brand_id,
+        },
+    )
 
 
 @login_required
