@@ -3,8 +3,40 @@
 {% block title %}Inventory{% endblock %}
 
 {% block content %}
+<style>
+    .inventory-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .inventory-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1.5rem;
+    }
+    
+    .inventory-table th {
+        text-align: left;
+        padding: 0.75rem;
+        border-bottom: 1px solid #ccc;
+    }
+    
+    .inventory-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .low-stock {
+        color: #d9534f;
+        font-weight: bold;
+    }
+</style>
+
 <section>
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
+    <div class="inventory-header">
         <div>
             <h2>Inventory</h2>
             <p>Manage inventory from one place.</p>
@@ -12,40 +44,70 @@
 
     </div>
 
+    <form method="get" class="inventory-filters">
+    <input type="text" name="search" placeholder="Search product or SKU" value="{{ search }}">
+
+    <select name="category">
+        <option value="">All Categories</option>
+        {% for category in categories %}
+        <option value="{{ category.id }}" {% if selected_category_id == category.id %}selected{% endif %}>
+            {{ category.name }}
+        </option>
+        {% endfor %}
+    </select>
+
+    <select name="brand">
+        <option value="">All Brands</option>
+        {% for brand in brands %}
+        <option value="{{ brand.id }}" {% if selected_brand_id == brand.id %}selected{% endif %}>
+            {{ brand.name }}
+        </option>
+        {% endfor %}
+    </select>
+
+    <select name="stock_status">
+        <option value="">All Stock Status</option>
+        <option value="low" {% if stock_status == "low" %}selected{% endif %}>Low Stock</option>
+        <option value="ok" {% if stock_status == "ok" %}selected{% endif %}>OK Stock</option>
+    </select>
+
+    <button type="submit">Apply</button>
+    <a href="{% url 'inventory_app:inventory_list' %}">Clear</a>
+    </form>
+
     {% if inventory %}
-    <table style="width:100%;border-collapse:collapse;margin-top:1.5rem;">
+    <table class="inventory-table">
         <thead>
             <tr>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Product</th>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">SKU</th>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Category</th>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Brand</th>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Stock</th>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Reorder Level</th>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Edit</th>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Actions</th>
+                <th>Product</th>
+                <th>SKU</th>
+                <th>Category</th>
+                <th>Brand</th>
+                <th>Stock</th>
+                <th>Status</th>
+                <th>Edit</th>
+                <th>Actions</th>
 
             </tr>
         </thead>
         <tbody>
             {% for item in inventory %}
             <tr>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ item.product.name }}</td>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ item.product.sku }}</td>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ item.product.category }}</td>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ item.product.brand }}</td>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ item.quantity }}</td>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">
-                    {% if item.quantity <= item.reorder_level %} <span style="color:#d9534f;font-weight:bold;">
-                        Low</span>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.product.sku }}</td>
+                <td>{{ item.product.category }}</td>
+                <td>{{ item.product.brand }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>
+                    {% if item.quantity <= item.reorder_level %}<span class="low-stock">Low</span>
                         {% else %}
                         OK
                         {% endif %}
                 </td>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">
+                <td>
                     <a href="{% url 'inventory_app:inventory_edit' item.pk %}">Edit</a>
                 </td>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">
+                <td>
                     <a href="{% url 'inventory_app:stock_in' item.pk %}" class="btn btn-sm btn-success">+ In</a>
 
                     <a href="{% url 'inventory_app:stock_out' item.pk %}" class="btn btn-sm btn-danger">-
@@ -55,6 +117,20 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <div class="pagination-controls">
+        {% if page_obj.has_previous %}
+        <a href="?page=1&search={{ search }}&category={{ selected_category }}&brand={{ selected_brand }}&stock_status={{ stock_status }}">First</a>
+        <a href="?page={{ page_obj.previous_page_number }}&search={{ search }}&category={{ selected_category }}&brand={{ selected_brand }}&stock_status={{ stock_status }}">Previous</a>
+        {% endif %}
+
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&search={{ search }}&category={{ selected_category }}&brand={{ selected_brand }}&stock_status={{ stock_status }}">Next</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}&search={{ search }}&category={{ selected_category }}&brand={{ selected_brand }}&stock_status={{ stock_status }}">Last</a>
+        {% endif %}
+    </div>
     {% else %}
     <p>No inventory items have been added yet.</p>
     {% endif %}

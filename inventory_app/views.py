@@ -8,13 +8,71 @@ from .forms import InventoryForm, StockMovementForm
 
 from inventory_app.services import stock_in, stock_out
 
+from products.models import Category, Brand
+
+from django.core.paginator import Paginator
+from django.db.models import Q, F
+
+
 # Create your views here.
 
 
 @login_required
 def inventory_list(request):
-    inventory = Inventory.objects.select_related('product').all()
-    return render(request, 'inventory/inventory_list.html', {'inventory': inventory})
+    search = request.GET.get('search', '').strip()
+    category_id = request.GET.get('category', '').strip()
+    brand_id = request.GET.get('brand', '').strip()
+    stock_status = request.GET.get('stock_status', '').strip()
+
+    selected_category_id = int(category_id) if category_id.isdigit() else None
+    selected_brand_id = int(brand_id) if brand_id.isdigit() else None
+
+    inventory = Inventory.objects.select_related(
+        'product',
+        'product__category',
+        'product__brand',
+    ).order_by('product__name')
+
+    if search:
+        inventory = inventory.filter(
+            Q(product__name__icontains=search) |
+            Q(product__sku__icontains=search)
+        )
+
+    if category_id:
+        inventory = inventory.filter(product__category_id=category_id)
+
+    if brand_id:
+        inventory = inventory.filter(product__brand_id=brand_id)
+
+    if stock_status == 'low':
+        inventory = inventory.filter(quantity__lte=F('reorder_level'))
+    elif stock_status == 'ok':
+        inventory = inventory.filter(quantity__gt=F('reorder_level'))
+
+    paginator = Paginator(inventory, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    categories = Category.objects.order_by('name')
+    brands = Brand.objects.order_by('name')
+
+    return render(
+        request,
+        'inventory/inventory_list.html',
+        {
+            'inventory': page_obj,
+            'page_obj': page_obj,
+            'categories': categories,
+            'brands': brands,
+            'search': search,
+            'stock_status': stock_status,
+            'selected_category': category_id,
+            'selected_brand': brand_id,
+            'selected_category_id': selected_category_id,
+            'selected_brand_id': selected_brand_id,
+        },
+    )
 
 
 @login_required
