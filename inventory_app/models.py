@@ -14,6 +14,11 @@ class Inventory(models.Model):
     reorder_level = models.IntegerField(default=5)
     last_updated = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        permissions = [
+            ('access_inventory_module', 'Can access inventory module'),
+        ]
+
     def __str__(self):
         return f"{self.product.name} - Stock: {self.quantity}"
 

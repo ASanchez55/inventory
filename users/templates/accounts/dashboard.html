@@ -8,9 +8,15 @@
     <p>You are successfully logged in to the Inventory Management System.</p>
 
     <div class="mt-4">
-        <!-- remove the  # later -->
-        <a href="{#% url 'products:list' %#}" class="btn">Manage Products</a>
-        <a href="{#% url 'inventory:list' %#}" class="btn btn-secondary">View Inventory</a>
+        {% if perms.products.access_products_module %}
+        <a href="{% url 'products:product_list' %}" class="btn">Manage Products</a>
+        {% endif %}
+        {% if perms.inventory_app.access_inventory_module %}
+        <a href="{% url 'inventory_app:inventory_list' %}" class="btn btn-secondary">View Inventory</a>
+        {% endif %}
+        {% if perms.users.access_users_module %}
+        <a href="{% url 'users:user_list' %}" class="btn btn-secondary">Manage Users</a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

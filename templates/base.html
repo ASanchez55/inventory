@@ -24,12 +24,18 @@
                 <!-- remove # after adding URLs -->
                 {% if user.is_authenticated %}
                 <li><a href="{% url 'users:dashboard' %}">Dashboard</a></li>
+                {% if perms.products.access_products_module %}
                 <li><a href="{% url 'products:brand_list' %}">Brands</a></li>
                 <li><a href="{% url 'products:category_list' %}">Categories</a></li>
                 <li><a href="{% url 'products:product_list' %}">Products</a></li>
+                {% endif %}
+                {% if perms.inventory_app.access_inventory_module %}
                 <li><a href="{% url 'inventory_app:inventory_list' %}">Inventory</a></li>
                 <li><a href="{% url 'inventory_app:stock_movement_list' %}">Stock Movements</a></li>
-                <li><a href="{#% url 'users:list' %#}">Users</a></li>
+                {% endif %}
+                {% if perms.users.access_users_module %}
+                <li><a href="{% url 'users:user_list' %}">Users</a></li>
+                {% endif %}
                 <li>
                     <form method="post" action="{% url 'logout' %}" style="display:inline;">
                         {% csrf_token %}
