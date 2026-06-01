@@ -1,6 +1,6 @@
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import Inventory, StockMovement
@@ -18,6 +18,7 @@ from django.db.models import Q, F
 
 
 @login_required
+@permission_required('inventory_app.access_inventory_module', raise_exception=True)
 def inventory_list(request):
     search = request.GET.get('search', '').strip()
     category_id = request.GET.get('category', '').strip()
@@ -76,6 +77,7 @@ def inventory_list(request):
 
 
 @login_required
+@permission_required('inventory_app.access_inventory_module', raise_exception=True)
 def inventory_edit(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
 
@@ -104,6 +106,7 @@ def inventory_edit(request, pk):
 
 
 @login_required
+@permission_required('inventory_app.access_inventory_module', raise_exception=True)
 def stock_movement_list(request):
     movements = StockMovement.objects.select_related(
         'product', 'user').order_by('-created_at')
@@ -111,6 +114,7 @@ def stock_movement_list(request):
 
 
 @login_required
+@permission_required('inventory_app.access_inventory_module', raise_exception=True)
 def stock_in_view(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
 
@@ -137,6 +141,7 @@ def stock_in_view(request, pk):
 
 
 @login_required
+@permission_required('inventory_app.access_inventory_module', raise_exception=True)
 def stock_out_view(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
 

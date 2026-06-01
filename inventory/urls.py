@@ -19,6 +19,8 @@ from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect
 
+from users.forms import PendingApprovalAuthenticationForm
+
 
 def home_view(request):
     if request.user.is_authenticated:
@@ -34,7 +36,8 @@ urlpatterns = [
     # Authentication URLs
     path('users/login/', auth_views.LoginView.as_view(
         template_name='accounts/login.html',
-        redirect_authenticated_user=True
+        redirect_authenticated_user=True,
+        authentication_form=PendingApprovalAuthenticationForm,
     ), name='login'),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path('users/password_reset/', auth_views.PasswordResetView.as_view(

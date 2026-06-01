@@ -23,3 +23,8 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        permissions = [
+            ('access_products_module', 'Can access products module'),
+        ]

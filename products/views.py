@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import BrandForm, CategoryForm, ProductForm
@@ -14,12 +14,14 @@ from django.db.models import Q
 
 
 @login_required
+@permission_required('products.access_products_module', raise_exception=True)
 def category_list(request):
     categories = Category.objects.order_by('name')
     return render(request, 'products/category_list.html', {'categories': categories})
 
 
 @login_required
+@permission_required('products.access_products_module', raise_exception=True)
 def category_create(request):
     if request.method == 'POST':
         form = CategoryForm(request.POST)
@@ -42,6 +44,7 @@ def category_create(request):
 
 
 @login_required
+@permission_required('products.access_products_module', raise_exception=True)
 def category_update(request, pk):
     category = get_object_or_404(Category, pk=pk)
 
@@ -67,6 +70,7 @@ def category_update(request, pk):
 
 
 @login_required
+@permission_required('products.access_products_module', raise_exception=True)
 def category_delete(request, pk):
     category = get_object_or_404(Category, pk=pk)
 
@@ -84,12 +88,14 @@ def category_delete(request, pk):
 
 # Brand views
 @login_required
+@permission_required('products.access_products_module', raise_exception=True)
 def brand_list(request):
     brands = Brand.objects.order_by('name')
     return render(request, 'products/brand_list.html', {'brands': brands})
 
 
 @login_required
+@permission_required('products.access_products_module', raise_exception=True)
 def brand_create(request):
     if request.method == 'POST':
         form = BrandForm(request.POST)
@@ -112,6 +118,7 @@ def brand_create(request):
 
 
 @login_required
+@permission_required('products.access_products_module', raise_exception=True)
 def brand_update(request, pk):
     brand = get_object_or_404(Brand, pk=pk)
 
@@ -137,6 +144,7 @@ def brand_update(request, pk):
 
 
 @login_required
+@permission_required('products.access_products_module', raise_exception=True)
 def brand_delete(request, pk):
     brand = get_object_or_404(Brand, pk=pk)
 
@@ -155,6 +163,7 @@ def brand_delete(request, pk):
 
 
 @login_required
+@permission_required('products.access_products_module', raise_exception=True)
 def product_list(request):
     search = request.GET.get('search', '').strip()
     category_id = request.GET.get('category', '').strip()
@@ -202,6 +211,7 @@ def product_list(request):
 
 
 @login_required
+@permission_required('products.access_products_module', raise_exception=True)
 def product_create(request):
     if request.method == 'POST':
         form = ProductForm(request.POST)
@@ -230,6 +240,7 @@ def product_create(request):
 
 
 @login_required
+@permission_required('products.access_products_module', raise_exception=True)
 def product_update(request, pk):
     product = get_object_or_404(Product, pk=pk)
 
@@ -255,6 +266,7 @@ def product_update(request, pk):
 
 
 @login_required
+@permission_required('products.access_products_module', raise_exception=True)
 def product_delete(request, pk):
     product = get_object_or_404(Product, pk=pk)
 
