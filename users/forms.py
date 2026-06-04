@@ -13,13 +13,28 @@ MODULE_PERMISSION_FILTER = (
 )
 
 
+def add_widget_class(field, css_class):
+    existing_classes = field.widget.attrs.get('class', '')
+    field.widget.attrs['class'] = f'{existing_classes} {css_class}'.strip()
+
+
 class RegisterForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
         fields = ('username',)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            add_widget_class(field, 'form-control')
+
 
 class PendingApprovalAuthenticationForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            add_widget_class(field, 'form-control')
+
     def clean(self):
         username = self.cleaned_data.get('username')
         password = self.cleaned_data.get('password')
@@ -50,6 +65,7 @@ class UserAccessForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        add_widget_class(self.fields['is_active'], 'form-check-input')
         self.fields['module_permissions'].queryset = Permission.objects.filter(
             MODULE_PERMISSION_FILTER
         ).order_by('content_type__app_label')

@@ -1,22 +1,30 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Dashboard - Inventory System{% endblock %}
 
-{% block content %}
-<div class="card">
-    <h2>Welcome, {{ user.username }}!</h2>
-    <p>You are successfully logged in to the Inventory Management System.</p>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/users.css' %}">
+{% endblock %}
 
-    <div class="mt-4">
+{% block content %}
+<div class="card border-0 shadow-sm users-page">
+    <div class="card-body p-4 p-lg-5">
+    <p class="text-uppercase small fw-semibold text-primary mb-2">Workspace</p>
+    <h2 class="h3 mb-2">Welcome, {{ user.username }}!</h2>
+    <p class="text-secondary mb-4">You are successfully logged in to the Inventory Management System.</p>
+
+    <div class="dashboard-actions">
         {% if perms.products.access_products_module %}
-        <a href="{% url 'products:product_list' %}" class="btn">Manage Products</a>
+        <a href="{% url 'products:product_list' %}" class="btn btn-primary">Manage Products</a>
         {% endif %}
         {% if perms.inventory_app.access_inventory_module %}
-        <a href="{% url 'inventory_app:inventory_list' %}" class="btn btn-secondary">View Inventory</a>
+        <a href="{% url 'inventory_app:inventory_list' %}" class="btn btn-outline-primary">View Inventory</a>
         {% endif %}
         {% if perms.users.access_users_module %}
-        <a href="{% url 'users:user_list' %}" class="btn btn-secondary">Manage Users</a>
+        <a href="{% url 'users:user_list' %}" class="btn btn-outline-dark">Manage Users</a>
         {% endif %}
+    </div>
     </div>
 </div>
 {% endblock %}

@@ -7,3 +7,13 @@
     color: #dc3545;
     font-weight: 700;
 }
+
+.inventory-form .form-label,
+.stock-movement-form .form-label {
+    font-weight: 600;
+}
+
+.inventory-list-page .page-link,
+.inventory-list-page .page-link:hover {
+    color: #1d4ed8;
+}

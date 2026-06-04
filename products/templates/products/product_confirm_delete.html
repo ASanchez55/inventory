@@ -1,16 +1,25 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Delete Product{% endblock %}
 
-{% block content %}
-<section style="max-width:32rem;">
-    <h2>Delete Product</h2>
-    <p>Are you sure you want to delete <strong>{{ product.name }}</strong>?</p>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/products.css' %}">
+{% endblock %}
 
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit">Yes, Delete</button>
-        <a href="{% url 'products:product_list' %}" style="margin-left:1rem;">Cancel</a>
-    </form>
+{% block content %}
+<section class="card border-0 shadow-sm page-card-sm product-confirm-page">
+    <div class="card-body p-4 p-lg-5">
+        <h2 class="h3 mb-3">Delete Product</h2>
+        <div class="alert alert-warning">
+            Are you sure you want to delete <strong>{{ product.name }}</strong>?
+        </div>
+
+        <form method="post" class="inline-actions mt-3">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+            <a href="{% url 'products:product_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
 </section>
 {% endblock %}

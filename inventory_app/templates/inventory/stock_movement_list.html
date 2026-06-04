@@ -1,53 +1,68 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Inventory{% endblock %}
+{% block title %}Stock Movements{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/inventory.css' %}">
+{% endblock %}
 
 {% block content %}
-<section>
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
-        <div>
-            <h2>Stock Movements</h2>
-
+<section class="card border-0 shadow-sm rounded-4 overflow-hidden inventory-page">
+    <div class="card-body p-4 p-lg-5">
+        <div class="mb-4">
+            <p class="text-uppercase small fw-semibold text-primary mb-2">Stock</p>
+            <h2 class="h3 mb-1">Stock Movements</h2>
+            <p class="text-secondary mb-0">Review inventory adjustments, references, and the user behind each stock change.</p>
         </div>
 
+        {% if movements %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Product</th>
+                        <th>SKU</th>
+                        <th>Type</th>
+                        <th>Quantity</th>
+                        <th>Reference</th>
+                        <th>User</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in movements %}
+                    <tr>
+                        <td class="fw-semibold">{{ item.product.name }}</td>
+                        <td><span class="badge text-bg-light border">{{ item.product.sku }}</span></td>
+                        <td>
+                            {% if item.movement_type == 'IN' %}
+                            <span class="badge text-bg-success">{{ item.get_movement_type_display }}</span>
+                            {% else %}
+                            <span class="badge text-bg-danger">{{ item.get_movement_type_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.reference|default:"-" }}</td>
+                        <td>
+                            {% if item.user %}
+                            {{ item.user.get_full_name|default:item.user.username }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>{{ item.created_at|date:"M d, Y H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <h3 class="h5 mb-2">No stock movements found</h3>
+            <p class="text-secondary mb-0">Stock changes will appear here once products start moving in or out.</p>
+        </div>
+        {% endif %}
     </div>
-
-    {% if movements %}
-    <table style="width:100%;border-collapse:collapse;margin-top:1.5rem;">
-        <thead>
-            <tr>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Product</th>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">SKU</th>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Type</th>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Quantity</th>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Reference</th>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">User</th>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Date</th>
-
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in movements %}
-            <tr>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ item.product.name }}</td>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ item.product.sku }}</td>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ item.movement_type }}</td>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ item.quantity }}</td>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ item.reference }}</td>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">
-                    {% if item.user %}
-                    {{ item.user.get_full_name|default:item.user.username }}
-                    {% else %}
-                    -
-                    {% endif %}
-                </td>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ item.created_at }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p>No stock movements found.</p>
-    {% endif %}
 </section>
 {% endblock %}
