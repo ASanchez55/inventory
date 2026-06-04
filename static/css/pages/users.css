@@ -1,0 +1,4 @@
+.users-page .table td,
+.users-page .table th {
+    white-space: nowrap;
+}

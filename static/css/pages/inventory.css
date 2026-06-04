@@ -1,0 +1,9 @@
+.inventory-page .table td,
+.inventory-page .table th {
+    white-space: nowrap;
+}
+
+.inventory-low-stock {
+    color: #dc3545;
+    font-weight: 700;
+}

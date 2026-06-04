@@ -1,49 +1,62 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Users - Inventory System{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/users.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="card">
-    <h2>User Access</h2>
-    <p>Activate pending users and choose which modules they can access.</p>
+<div class="card border-0 shadow-sm users-page">
+    <div class="card-body p-4 p-lg-5">
+    <h2 class="h3 mb-2">User Access</h2>
+    <p class="text-secondary mb-4">Activate pending users and choose which modules they can access.</p>
 
     {% if user_rows %}
-    <table style="width:100%;border-collapse:collapse;margin-top:1.5rem;">
-        <thead>
+    <div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
             <tr>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Username</th>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Status</th>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Product Access</th>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Inventory Access</th>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Users Access</th>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Actions</th>
+                <th>Username</th>
+                <th>Status</th>
+                <th>Product Access</th>
+                <th>Inventory Access</th>
+                <th>Users Access</th>
+                <th class="text-end">Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for row in user_rows %}
             <tr>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ row.user.username }}</td>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">
-                    {% if row.user.is_active %}Active{% else %}Pending{% endif %}
+                <td class="fw-semibold">{{ row.user.username }}</td>
+                <td>
+                    {% if row.user.is_active %}
+                    <span class="badge text-bg-success">Active</span>
+                    {% else %}
+                    <span class="badge text-bg-warning">Pending</span>
+                    {% endif %}
                 </td>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">
+                <td>
                     {% if row.has_products_access %}Yes{% else %}No{% endif %}
                 </td>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">
+                <td>
                     {% if row.has_inventory_access %}Yes{% else %}No{% endif %}
                 </td>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">
+                <td>
                     {% if row.has_users_access %}Yes{% else %}No{% endif %}
                 </td>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">
-                    <a href="{% url 'users:user_access_update' row.user.pk %}">Review Access</a>
+                <td class="text-end">
+                    <a href="{% url 'users:user_access_update' row.user.pk %}" class="btn btn-sm btn-outline-primary">Review Access</a>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    </div>
     {% else %}
-    <p>No users found.</p>
+    <p class="mb-0">No users found.</p>
     {% endif %}
+    </div>
 </div>
 {% endblock %}
