@@ -10,9 +10,9 @@
 {% block content %}
 <div class="card border-0 shadow-sm users-page">
     <div class="card-body p-4 p-lg-5">
-    <p class="text-uppercase small fw-semibold text-primary mb-2">Workspace</p>
-    <h2 class="h3 mb-2">Welcome, {{ user.username }}!</h2>
-    <p class="text-secondary mb-4">You are successfully logged in to the Inventory Management System.</p>
+    {% with welcome_title='Welcome, '|add:user.username|add:'!' %}
+    {% include 'includes/page_header.html' with kicker='Workspace' title=welcome_title description='You are successfully logged in to the Inventory Management System.' %}
+    {% endwith %}
 
     <div class="dashboard-actions">
         {% if perms.products.access_products_module %}

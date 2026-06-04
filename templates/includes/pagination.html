@@ -1,0 +1,27 @@
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mt-4">
+    <p class="text-secondary small mb-0">
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </p>
+
+    <nav aria-label="{{ aria_label|default:'Pagination' }}">
+        <ul class="pagination pagination-sm mb-0">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if pagination_query %}&{{ pagination_query }}{% endif %}">First</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if pagination_query %}&{{ pagination_query }}{% endif %}">Previous</a>
+            </li>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if pagination_query %}&{{ pagination_query }}{% endif %}">Next</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if pagination_query %}&{{ pagination_query }}{% endif %}">Last</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>

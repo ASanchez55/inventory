@@ -8,18 +8,6 @@
 {% endblock %}
 
 {% block content %}
-<section class="card border-0 shadow-sm page-card-sm product-confirm-page">
-    <div class="card-body p-4 p-lg-5">
-        <h2 class="h3 mb-3">Delete Product</h2>
-        <div class="alert alert-warning">
-            Are you sure you want to delete <strong>{{ product.name }}</strong>?
-        </div>
-
-        <form method="post" class="inline-actions mt-3">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Yes, Delete</button>
-            <a href="{% url 'products:product_list' %}" class="btn btn-outline-secondary">Cancel</a>
-        </form>
-    </div>
-</section>
+{% url 'products:product_list' as cancel_url %}
+{% include 'includes/confirm_delete_card.html' with title='Delete Product' item_name=product.name cancel_url=cancel_url %}
 {% endblock %}

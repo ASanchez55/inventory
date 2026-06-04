@@ -10,13 +10,7 @@
 {% block content %}
 <section class="card border-0 shadow-sm rounded-4 overflow-hidden inventory-page">
     <div class="card-body p-4 p-lg-5">
-        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
-            <div>
-                <p class="text-uppercase small fw-semibold text-primary mb-2">Stock</p>
-                <h2 class="h3 mb-1">Inventory</h2>
-                <p class="text-secondary mb-0">Monitor stock levels, filter items quickly, and take stock actions in one place.</p>
-            </div>
-        </div>
+        {% include 'includes/page_header.html' with kicker='Stock' title='Inventory' description='Monitor stock levels, filter items quickly, and take stock actions in one place.' %}
 
         <form method="get" class="row g-3 align-items-end mb-4">
             <div class="col-12 col-lg-4">
@@ -106,32 +100,7 @@
             </table>
         </div>
 
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mt-4">
-            <p class="text-secondary small mb-0">
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-            </p>
-
-            <nav aria-label="Inventory pagination">
-                <ul class="pagination pagination-sm mb-0">
-                    {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page=1&search={{ search }}&category={{ selected_category }}&brand={{ selected_brand }}&stock_status={{ stock_status }}">First</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search }}&category={{ selected_category }}&brand={{ selected_brand }}&stock_status={{ stock_status }}">Previous</a>
-                    </li>
-                    {% endif %}
-                    {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search }}&category={{ selected_category }}&brand={{ selected_brand }}&stock_status={{ stock_status }}">Next</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&search={{ search }}&category={{ selected_category }}&brand={{ selected_brand }}&stock_status={{ stock_status }}">Last</a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
+        {% include 'includes/pagination.html' with aria_label='Inventory pagination' %}
         {% else %}
         <div class="text-center py-5">
             <h3 class="h5 mb-2">No inventory items found</h3>

@@ -8,16 +8,10 @@
 {% endblock %}
 
 {% block content %}
+{% url 'products:product_add' as product_add_url %}
 <section class="card border-0 shadow-sm rounded-4 overflow-hidden product-page">
     <div class="card-body p-4 p-lg-5">
-        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
-            <div>
-                <p class="text-uppercase small fw-semibold text-primary mb-2">Catalog</p>
-                <h2 class="h3 mb-1">Products</h2>
-                <p class="text-secondary mb-0">Search the catalog, filter by category or brand, and manage product records.</p>
-            </div>
-            <a href="{% url 'products:product_add' %}" class="btn btn-primary rounded-pill px-4">Add Product</a>
-        </div>
+        {% include 'includes/page_header.html' with kicker='Catalog' title='Products' description='Search the catalog, filter by category or brand, and manage product records.' action_url=product_add_url action_label='Add Product' %}
 
         <form method="get" class="row g-3 align-items-end mb-4">
             <div class="col-12 col-lg-4">
@@ -87,33 +81,7 @@
             </table>
         </div>
 
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mt-4">
-            <p class="text-secondary small mb-0">
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-            </p>
-
-            <nav aria-label="Products pagination">
-                <ul class="pagination pagination-sm mb-0">
-                    {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page=1&search={{ search }}&category={{ selected_category }}&brand={{ selected_brand }}">First</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search }}&category={{ selected_category }}&brand={{ selected_brand }}">Previous</a>
-                    </li>
-                    {% endif %}
-
-                    {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search }}&category={{ selected_category }}&brand={{ selected_brand }}">Next</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&search={{ search }}&category={{ selected_category }}&brand={{ selected_brand }}">Last</a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
+        {% include 'includes/pagination.html' with aria_label='Products pagination' %}
         {% else %}
         <div class="text-center py-5">
             <h3 class="h5 mb-2">No products found</h3>

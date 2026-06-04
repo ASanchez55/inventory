@@ -10,11 +10,7 @@
 {% block content %}
 <section class="card border-0 shadow-sm rounded-4 overflow-hidden inventory-page">
     <div class="card-body p-4 p-lg-5">
-        <div class="mb-4">
-            <p class="text-uppercase small fw-semibold text-primary mb-2">Stock</p>
-            <h2 class="h3 mb-1">Stock Movements</h2>
-            <p class="text-secondary mb-0">Review inventory adjustments, references, and the user behind each stock change.</p>
-        </div>
+        {% include 'includes/page_header.html' with kicker='Stock' title='Stock Movements' description='Review inventory adjustments, references, and the user behind each stock change.' %}
 
         {% if movements %}
         <div class="table-responsive">
