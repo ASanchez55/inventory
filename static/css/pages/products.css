@@ -17,3 +17,7 @@
 .product-confirm-page .alert {
     border-radius: 1rem;
 }
+
+.product-form .btn-outline-primary {
+    white-space: nowrap;
+}
