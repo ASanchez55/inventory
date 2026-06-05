@@ -1,16 +1,13 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Delete Brand{% endblock %}
 
-{% block content %}
-<section style="max-width:32rem;">
-    <h2>Delete Brand</h2>
-    <p>Are you sure you want to delete <strong>{{ brand.name }}</strong>?</p>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/products.css' %}">
+{% endblock %}
 
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit">Yes, Delete</button>
-        <a href="{% url 'products:brand_list' %}" style="margin-left:1rem;">Cancel</a>
-    </form>
-</section>
+{% block content %}
+{% url 'products:brand_list' as cancel_url %}
+{% include 'includes/confirm_delete_card.html' with title='Delete Brand' item_name=brand.name cancel_url=cancel_url %}
 {% endblock %}

@@ -3,10 +3,25 @@ from django import forms
 from .models import Category, Brand, Product
 
 
+def apply_bootstrap_classes(form):
+    for field in form.fields.values():
+        if isinstance(field.widget, forms.CheckboxInput):
+            field.widget.attrs['class'] = 'form-check-input'
+            continue
+
+        css_class = 'form-select' if isinstance(field.widget, forms.Select) else 'form-control'
+        existing_classes = field.widget.attrs.get('class', '')
+        field.widget.attrs['class'] = f'{existing_classes} {css_class}'.strip()
+
+
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
         fields = ['name']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        apply_bootstrap_classes(self)
 
     def clean_name(self):
         name = self.cleaned_data['name'].strip()
@@ -24,6 +39,10 @@ class BrandForm(forms.ModelForm):
     class Meta:
         model = Brand
         fields = ['name']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        apply_bootstrap_classes(self)
 
     def clean_name(self):
         name = self.cleaned_data['name'].strip()
@@ -57,3 +76,4 @@ class ProductForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['category'].queryset = Category.objects.order_by('name')
         self.fields['brand'].queryset = Brand.objects.order_by('name')
+        apply_bootstrap_classes(self)

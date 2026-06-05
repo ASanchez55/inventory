@@ -1,39 +1,49 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Brands{% endblock %}
 
-{% block content %}
-<section>
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
-        <div>
-            <h2>Brands</h2>
-            <p>Manage product brands from one place.</p>
-        </div>
-        <a href="{% url 'products:brand_add' %}">Add Brand</a>
-    </div>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/products.css' %}">
+{% endblock %}
 
-    {% if brands %}
-    <table style="width:100%;border-collapse:collapse;margin-top:1.5rem;">
-        <thead>
-            <tr>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Name</th>
-                <th style="text-align:left;padding:0.75rem;border-bottom:1px solid #ccc;">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for brand in brands %}
-            <tr>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">{{ brand.name }}</td>
-                <td style="padding:0.75rem;border-bottom:1px solid #eee;">
-                    <a href="{% url 'products:brand_edit' brand.pk %}">Edit</a>
-                    <a href="{% url 'products:brand_delete' brand.pk %}" style="margin-left:1rem;">Delete</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p>No brands have been added yet.</p>
-    {% endif %}
+{% block content %}
+{% url 'products:brand_add' as brand_add_url %}
+<section class="card border-0 shadow-sm rounded-4 overflow-hidden product-list-page">
+    <div class="card-body p-4 p-lg-5">
+        {% include 'includes/page_header.html' with kicker='Catalog' title='Brands' description='Manage the brands available in your product catalog.' action_url=brand_add_url action_label='Add Brand' %}
+
+        {% if brands %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for brand in brands %}
+                    <tr>
+                        <td class="fw-semibold">{{ brand.name }}</td>
+                        <td class="text-end">
+                            <div class="inline-actions justify-content-end">
+                                <a href="{% url 'products:brand_edit' brand.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <a href="{% url 'products:brand_delete' brand.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <h3 class="h5 mb-2">No brands yet</h3>
+            <p class="text-secondary mb-4">Add your first brand to start organizing products.</p>
+            <a href="{% url 'products:brand_add' %}" class="btn btn-primary rounded-pill px-4">Add Brand</a>
+        </div>
+        {% endif %}
+    </div>
 </section>
 {% endblock %}

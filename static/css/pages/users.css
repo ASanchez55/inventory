@@ -1,0 +1,14 @@
+.users-page .table td,
+.users-page .table th {
+    white-space: nowrap;
+}
+
+.dashboard-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.user-access-page .form-check {
+    margin-bottom: 0.75rem;
+}

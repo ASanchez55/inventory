@@ -1,0 +1,14 @@
+<section class="card border-0 shadow-sm page-card-sm product-confirm-page">
+    <div class="card-body p-4 p-lg-5">
+        <h2 class="h3 mb-3">{{ title }}</h2>
+        <div class="alert alert-warning">
+            Are you sure you want to delete <strong>{{ item_name }}</strong>?
+        </div>
+
+        <form method="post" class="inline-actions mt-3">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">{{ confirm_label|default:'Yes, Delete' }}</button>
+            <a href="{{ cancel_url }}" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
+</section>

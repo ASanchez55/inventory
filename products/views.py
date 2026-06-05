@@ -189,6 +189,8 @@ def product_list(request):
     paginator = Paginator(products, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    pagination_query_params = request.GET.copy()
+    pagination_query_params.pop('page', None)
 
     categories = Category.objects.order_by('name')
     brands = Brand.objects.order_by('name')
@@ -206,6 +208,7 @@ def product_list(request):
             'selected_brand': brand_id,
             'selected_category_id': selected_category_id,
             'selected_brand_id': selected_brand_id,
+            'pagination_query': pagination_query_params.urlencode(),
         },
     )
 

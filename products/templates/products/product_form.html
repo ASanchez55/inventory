@@ -1,28 +1,22 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}{{ page_title }}{% endblock %}
 
-{% block content %}
-<style>
-    .form-section {
-        max-width: 32rem;
-    }
-    .form-group {
-        margin-bottom: 1rem;
-    }
-    .cancel-link {
-        margin-left: 1rem;
-    }
-</style>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/products.css' %}">
+{% endblock %}
 
-<section class="form-section">
-    <h2>{{ page_title }}</h2>
+{% block content %}
+<section class="card border-0 shadow-sm page-card-sm product-form">
+    <div class="card-body p-4 p-lg-5">
+    <h2 class="h3 mb-4">{{ page_title }}</h2>
 
     <form method="post">
         {% csrf_token %}
 
         {% if form.non_field_errors %}
-        <div>
+        <div class="alert alert-danger">
             {{ form.non_field_errors }}
         </div>
         {% endif %}
@@ -31,7 +25,7 @@
             <label for="{{ form.name.id_for_label }}">Product Name</label>
             {{ form.name }}
             {% if form.name.errors %}
-            <div>
+            <div class="field-error">
                 {{ form.name.errors }}
             </div>
             {% endif %}
@@ -41,7 +35,7 @@
             <label for="{{ form.sku.id_for_label }}">SKU</label>
             {{ form.sku }}
             {% if form.sku.errors %}
-            <div>
+            <div class="field-error">
                 {{ form.sku.errors }}
             </div>
             {% endif %}
@@ -51,7 +45,7 @@
             <label for="{{ form.category.id_for_label }}">Category</label>
             {{ form.category }}
             {% if form.category.errors %}
-            <div>
+            <div class="field-error">
                 {{ form.category.errors }}
             </div>
             {% endif %}
@@ -61,7 +55,7 @@
             <label for="{{ form.brand.id_for_label }}">Brand</label>
             {{ form.brand }}
             {% if form.brand.errors %}
-            <div>
+            <div class="field-error">
                 {{ form.brand.errors }}
             </div>
             {% endif %}
@@ -71,14 +65,17 @@
             <label for="{{ form.price.id_for_label }}">Price</label>
             {{ form.price }}
             {% if form.price.errors %}
-            <div>
+            <div class="field-error">
                 {{ form.price.errors }}
             </div>
             {% endif %}
         </div>
 
-        <button type="submit">{{ button_label }}</button>
-        <a href="{% url 'products:brand_list' %}" class="cancel-link">Cancel</a>
+        <div class="inline-actions mt-3">
+            <button type="submit" class="btn btn-primary">{{ button_label }}</button>
+            <a href="{% url 'products:product_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
     </form>
+    </div>
 </section>
 {% endblock %}
