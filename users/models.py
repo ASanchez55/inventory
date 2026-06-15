@@ -7,6 +7,7 @@ class UserAccess(models.Model):
     class Meta:
         permissions = [
             ('access_users_module', 'Can access users module'),
+            ('access_reports_module', 'Can access reports module'),
         ]
         verbose_name = 'User access'
         verbose_name_plural = 'User access'

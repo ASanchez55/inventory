@@ -10,6 +10,7 @@ MODULE_PERMISSION_FILTER = (
     Q(content_type__app_label='products', codename='access_products_module')
     | Q(content_type__app_label='inventory_app', codename='access_inventory_module')
     | Q(content_type__app_label='users', codename='access_users_module')
+    | Q(content_type__app_label='users', codename='access_reports_module')
 )
 
 
@@ -81,6 +82,7 @@ class UserAccessForm(forms.ModelForm):
             ('products', 'access_products_module'): 'Products',
             ('inventory_app', 'access_inventory_module'): 'Inventory',
             ('users', 'access_users_module'): 'Users',
+            ('users', 'access_reports_module'): 'Reports',
         }
         return labels.get(
             (permission.content_type.app_label, permission.codename),

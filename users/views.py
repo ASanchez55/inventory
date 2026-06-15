@@ -1,11 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, permission_required
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
+from core.reporting import build_reports_snapshot
 from core.utils import paginate_queryset
-from django.db.models import Q
-
 from .forms import RegisterForm, UserAccessForm
 
 User = get_user_model()
@@ -13,7 +13,10 @@ User = get_user_model()
 
 @login_required
 def dashboard(request):
-    return render(request, 'accounts/dashboard.html')
+    context = {}
+    if request.user.has_perm('users.access_reports_module'):
+        context['reports_snapshot'] = build_reports_snapshot()
+    return render(request, 'accounts/dashboard.html', context)
 
 
 def register(request):
@@ -54,6 +57,7 @@ def user_list(request):
             'has_products_access': managed_user.has_perm('products.access_products_module'),
             'has_inventory_access': managed_user.has_perm('inventory_app.access_inventory_module'),
             'has_users_access': managed_user.has_perm('users.access_users_module'),
+            'has_reports_access': managed_user.has_perm('users.access_reports_module'),
         }
         for managed_user in page_obj
     ]
@@ -92,4 +96,14 @@ def user_access_update(request, pk):
             'page_title': f'Manage Access - {managed_user.username}',
             'button_label': 'Save Access',
         },
+    )
+
+
+@login_required
+@permission_required('users.access_reports_module', raise_exception=True)
+def reports(request):
+    return render(
+        request,
+        'accounts/reports.html',
+        {'reports_snapshot': build_reports_snapshot()},
     )
