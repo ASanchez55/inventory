@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import get_object_or_404, redirect, render
 
+from core.utils import paginate_queryset
 from .models import Inventory, StockMovement
 from .forms import InventoryForm, StockMovementForm
 
@@ -10,7 +11,6 @@ from inventory_app.services import stock_in, stock_out
 
 from products.models import Category, Brand
 
-from django.core.paginator import Paginator
 from django.db.models import Q, F
 
 
@@ -51,11 +51,7 @@ def inventory_list(request):
     elif stock_status == 'ok':
         inventory = inventory.filter(quantity__gt=F('reorder_level'))
 
-    paginator = Paginator(inventory, 5)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    pagination_query_params = request.GET.copy()
-    pagination_query_params.pop('page', None)
+    page_obj, pagination_query = paginate_queryset(request, inventory)
 
     categories = Category.objects.order_by('name')
     brands = Brand.objects.order_by('name')
@@ -74,7 +70,7 @@ def inventory_list(request):
             'selected_brand': brand_id,
             'selected_category_id': selected_category_id,
             'selected_brand_id': selected_brand_id,
-            'pagination_query': pagination_query_params.urlencode(),
+            'pagination_query': pagination_query,
         },
     )
 

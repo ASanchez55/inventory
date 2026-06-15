@@ -3,12 +3,12 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
+from core.utils import paginate_queryset
 from .forms import BrandForm, CategoryForm, ProductForm
 from .models import Category, Brand, Product
 
 from products.services import create_product
 
-from django.core.paginator import Paginator
 from django.db.models import Q
 
 
@@ -17,15 +17,6 @@ def _build_lookup_payload(obj):
         'id': obj.pk,
         'name': obj.name,
     }
-
-
-def _paginate_queryset(request, queryset, page_size=5):
-    paginator = Paginator(queryset, page_size)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    pagination_query_params = request.GET.copy()
-    pagination_query_params.pop('page', None)
-    return page_obj, pagination_query_params.urlencode()
 
 # Category views
 
@@ -39,7 +30,7 @@ def category_list(request):
     if search:
         categories = categories.filter(name__icontains=search)
 
-    page_obj, pagination_query = _paginate_queryset(request, categories)
+    page_obj, pagination_query = paginate_queryset(request, categories)
 
     return render(
         request,
@@ -136,7 +127,7 @@ def brand_list(request):
     if search:
         brands = brands.filter(name__icontains=search)
 
-    page_obj, pagination_query = _paginate_queryset(request, brands)
+    page_obj, pagination_query = paginate_queryset(request, brands)
 
     return render(
         request,
@@ -249,7 +240,7 @@ def product_list(request):
     if brand_id:
         products = products.filter(brand_id=brand_id)
 
-    page_obj, pagination_query = _paginate_queryset(request, products)
+    page_obj, pagination_query = paginate_queryset(request, products)
 
     categories = Category.objects.order_by('name')
     brands = Brand.objects.order_by('name')
