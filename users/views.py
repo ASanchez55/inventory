@@ -3,6 +3,9 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import get_object_or_404, redirect, render
 
+from core.utils import paginate_queryset
+from django.db.models import Q
+
 from .forms import RegisterForm, UserAccessForm
 
 User = get_user_model()
@@ -33,7 +36,18 @@ def register(request):
 @login_required
 @permission_required('users.access_users_module', raise_exception=True)
 def user_list(request):
+    search = request.GET.get('search', '').strip()
     users = User.objects.order_by('username')
+
+    if search:
+        users = users.filter(
+            Q(username__icontains=search)
+            | Q(first_name__icontains=search)
+            | Q(last_name__icontains=search)
+            | Q(email__icontains=search)
+        )
+
+    page_obj, pagination_query = paginate_queryset(request, users)
     user_rows = [
         {
             'user': managed_user,
@@ -41,9 +55,18 @@ def user_list(request):
             'has_inventory_access': managed_user.has_perm('inventory_app.access_inventory_module'),
             'has_users_access': managed_user.has_perm('users.access_users_module'),
         }
-        for managed_user in users
+        for managed_user in page_obj
     ]
-    return render(request, 'accounts/user_list.html', {'user_rows': user_rows})
+    return render(
+        request,
+        'accounts/user_list.html',
+        {
+            'user_rows': user_rows,
+            'page_obj': page_obj,
+            'search': search,
+            'pagination_query': pagination_query,
+        },
+    )
 
 
 @login_required

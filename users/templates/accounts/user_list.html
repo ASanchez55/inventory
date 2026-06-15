@@ -13,6 +13,19 @@
     <h2 class="h3 mb-2">User Access</h2>
     <p class="text-secondary mb-4">Activate pending users and choose which modules they can access.</p>
 
+    <form method="get" class="row g-3 align-items-end mb-4">
+        <div class="col-12 col-lg-6">
+            <label for="search" class="form-label fw-semibold">Search</label>
+            <input id="search" type="text" name="search" class="form-control"
+                placeholder="Search by username, name, or email" value="{{ search }}">
+        </div>
+
+        <div class="col-12 col-lg-3 d-grid gap-2">
+            <button type="submit" class="btn btn-dark">Apply</button>
+            <a href="{% url 'users:user_list' %}" class="btn btn-outline-secondary">Clear</a>
+        </div>
+    </form>
+
     {% if user_rows %}
     <div class="table-responsive">
     <table class="table table-hover align-middle">
@@ -54,8 +67,15 @@
         </tbody>
     </table>
     </div>
+    {% include 'includes/pagination.html' with aria_label='Users pagination' %}
     {% else %}
-    <p class="mb-0">No users found.</p>
+    <p class="mb-0">
+        {% if search %}
+        No users matched your search.
+        {% else %}
+        No users found.
+        {% endif %}
+    </p>
     {% endif %}
     </div>
 </div>

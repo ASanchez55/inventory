@@ -107,9 +107,33 @@ def inventory_edit(request, pk):
 @login_required
 @permission_required('inventory_app.access_inventory_module', raise_exception=True)
 def stock_movement_list(request):
+    search = request.GET.get('search', '').strip()
     movements = StockMovement.objects.select_related(
         'product', 'user').order_by('-created_at')
-    return render(request, 'inventory/stock_movement_list.html', {'movements': movements})
+
+    if search:
+        movements = movements.filter(
+            Q(product__name__icontains=search)
+            | Q(product__sku__icontains=search)
+            | Q(reference__icontains=search)
+            | Q(user__username__icontains=search)
+            | Q(user__first_name__icontains=search)
+            | Q(user__last_name__icontains=search)
+            | Q(movement_type__icontains=search)
+        )
+
+    page_obj, pagination_query = paginate_queryset(request, movements)
+
+    return render(
+        request,
+        'inventory/stock_movement_list.html',
+        {
+            'movements': page_obj,
+            'page_obj': page_obj,
+            'search': search,
+            'pagination_query': pagination_query,
+        },
+    )
 
 
 @login_required

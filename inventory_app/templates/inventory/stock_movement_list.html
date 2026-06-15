@@ -12,6 +12,19 @@
     <div class="card-body p-4 p-lg-5">
         {% include 'includes/page_header.html' with kicker='Stock' title='Stock Movements' description='Review inventory adjustments, references, and the user behind each stock change.' %}
 
+        <form method="get" class="row g-3 align-items-end mb-4">
+            <div class="col-12 col-lg-6">
+                <label for="search" class="form-label fw-semibold">Search</label>
+                <input id="search" type="text" name="search" class="form-control"
+                    placeholder="Search by product, SKU, reference, or user" value="{{ search }}">
+            </div>
+
+            <div class="col-12 col-lg-3 d-grid gap-2">
+                <button type="submit" class="btn btn-dark">Apply</button>
+                <a href="{% url 'inventory_app:stock_movement_list' %}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+
         {% if movements %}
         <div class="table-responsive">
             <table class="table table-hover align-middle">
@@ -53,10 +66,17 @@
                 </tbody>
             </table>
         </div>
+        {% include 'includes/pagination.html' with aria_label='Stock movements pagination' %}
         {% else %}
         <div class="text-center py-5">
             <h3 class="h5 mb-2">No stock movements found</h3>
-            <p class="text-secondary mb-0">Stock changes will appear here once products start moving in or out.</p>
+            <p class="text-secondary mb-0">
+                {% if search %}
+                Try a different search to find the movement you need.
+                {% else %}
+                Stock changes will appear here once products start moving in or out.
+                {% endif %}
+            </p>
         </div>
         {% endif %}
     </div>
