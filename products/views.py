@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import BrandForm, CategoryForm, ProductForm
@@ -9,6 +10,13 @@ from products.services import create_product
 
 from django.core.paginator import Paginator
 from django.db.models import Q
+
+
+def _build_lookup_payload(obj):
+    return {
+        'id': obj.pk,
+        'name': obj.name,
+    }
 
 # Category views
 
@@ -26,9 +34,16 @@ def category_create(request):
     if request.method == 'POST':
         form = CategoryForm(request.POST)
         if form.is_valid():
-            form.save()
+            category = form.save()
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse(
+                    {'success': True, 'category': _build_lookup_payload(category)},
+                    status=201,
+                )
             messages.success(request, 'Category added successfully.')
             return redirect('products:category_list')
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
     else:
         form = CategoryForm()
 
@@ -100,9 +115,16 @@ def brand_create(request):
     if request.method == 'POST':
         form = BrandForm(request.POST)
         if form.is_valid():
-            form.save()
+            brand = form.save()
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse(
+                    {'success': True, 'brand': _build_lookup_payload(brand)},
+                    status=201,
+                )
             messages.success(request, 'Brand added successfully.')
             return redirect('products:brand_list')
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
     else:
         form = BrandForm()
 
