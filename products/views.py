@@ -3,12 +3,12 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
+from core.utils import paginate_queryset
 from .forms import BrandForm, CategoryForm, ProductForm
 from .models import Category, Brand, Product
 
 from products.services import create_product
 
-from django.core.paginator import Paginator
 from django.db.models import Q
 
 
@@ -24,8 +24,24 @@ def _build_lookup_payload(obj):
 @login_required
 @permission_required('products.access_products_module', raise_exception=True)
 def category_list(request):
+    search = request.GET.get('search', '').strip()
     categories = Category.objects.order_by('name')
-    return render(request, 'products/category_list.html', {'categories': categories})
+
+    if search:
+        categories = categories.filter(name__icontains=search)
+
+    page_obj, pagination_query = paginate_queryset(request, categories)
+
+    return render(
+        request,
+        'products/category_list.html',
+        {
+            'categories': page_obj,
+            'page_obj': page_obj,
+            'search': search,
+            'pagination_query': pagination_query,
+        },
+    )
 
 
 @login_required
@@ -105,8 +121,24 @@ def category_delete(request, pk):
 @login_required
 @permission_required('products.access_products_module', raise_exception=True)
 def brand_list(request):
+    search = request.GET.get('search', '').strip()
     brands = Brand.objects.order_by('name')
-    return render(request, 'products/brand_list.html', {'brands': brands})
+
+    if search:
+        brands = brands.filter(name__icontains=search)
+
+    page_obj, pagination_query = paginate_queryset(request, brands)
+
+    return render(
+        request,
+        'products/brand_list.html',
+        {
+            'brands': page_obj,
+            'page_obj': page_obj,
+            'search': search,
+            'pagination_query': pagination_query,
+        },
+    )
 
 
 @login_required
@@ -208,11 +240,7 @@ def product_list(request):
     if brand_id:
         products = products.filter(brand_id=brand_id)
 
-    paginator = Paginator(products, 5)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    pagination_query_params = request.GET.copy()
-    pagination_query_params.pop('page', None)
+    page_obj, pagination_query = paginate_queryset(request, products)
 
     categories = Category.objects.order_by('name')
     brands = Brand.objects.order_by('name')
@@ -230,7 +258,7 @@ def product_list(request):
             'selected_brand': brand_id,
             'selected_category_id': selected_category_id,
             'selected_brand_id': selected_brand_id,
-            'pagination_query': pagination_query_params.urlencode(),
+            'pagination_query': pagination_query,
         },
     )
 
