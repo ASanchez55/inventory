@@ -18,14 +18,39 @@ def _build_lookup_payload(obj):
         'name': obj.name,
     }
 
+
+def _paginate_queryset(request, queryset, page_size=5):
+    paginator = Paginator(queryset, page_size)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    pagination_query_params = request.GET.copy()
+    pagination_query_params.pop('page', None)
+    return page_obj, pagination_query_params.urlencode()
+
 # Category views
 
 
 @login_required
 @permission_required('products.access_products_module', raise_exception=True)
 def category_list(request):
+    search = request.GET.get('search', '').strip()
     categories = Category.objects.order_by('name')
-    return render(request, 'products/category_list.html', {'categories': categories})
+
+    if search:
+        categories = categories.filter(name__icontains=search)
+
+    page_obj, pagination_query = _paginate_queryset(request, categories)
+
+    return render(
+        request,
+        'products/category_list.html',
+        {
+            'categories': page_obj,
+            'page_obj': page_obj,
+            'search': search,
+            'pagination_query': pagination_query,
+        },
+    )
 
 
 @login_required
@@ -105,8 +130,24 @@ def category_delete(request, pk):
 @login_required
 @permission_required('products.access_products_module', raise_exception=True)
 def brand_list(request):
+    search = request.GET.get('search', '').strip()
     brands = Brand.objects.order_by('name')
-    return render(request, 'products/brand_list.html', {'brands': brands})
+
+    if search:
+        brands = brands.filter(name__icontains=search)
+
+    page_obj, pagination_query = _paginate_queryset(request, brands)
+
+    return render(
+        request,
+        'products/brand_list.html',
+        {
+            'brands': page_obj,
+            'page_obj': page_obj,
+            'search': search,
+            'pagination_query': pagination_query,
+        },
+    )
 
 
 @login_required
@@ -208,11 +249,7 @@ def product_list(request):
     if brand_id:
         products = products.filter(brand_id=brand_id)
 
-    paginator = Paginator(products, 5)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    pagination_query_params = request.GET.copy()
-    pagination_query_params.pop('page', None)
+    page_obj, pagination_query = _paginate_queryset(request, products)
 
     categories = Category.objects.order_by('name')
     brands = Brand.objects.order_by('name')
@@ -230,7 +267,7 @@ def product_list(request):
             'selected_brand': brand_id,
             'selected_category_id': selected_category_id,
             'selected_brand_id': selected_brand_id,
-            'pagination_query': pagination_query_params.urlencode(),
+            'pagination_query': pagination_query,
         },
     )
 

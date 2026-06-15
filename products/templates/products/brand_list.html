@@ -13,6 +13,19 @@
     <div class="card-body p-4 p-lg-5">
         {% include 'includes/page_header.html' with kicker='Catalog' title='Brands' description='Manage the brands available in your product catalog.' action_url=brand_add_url action_label='Add Brand' %}
 
+        <form method="get" class="row g-3 align-items-end mb-4">
+            <div class="col-12 col-lg-6">
+                <label for="search" class="form-label fw-semibold">Search</label>
+                <input id="search" type="text" name="search" class="form-control"
+                    placeholder="Search brands by name" value="{{ search }}">
+            </div>
+
+            <div class="col-12 col-lg-3 d-grid gap-2">
+                <button type="submit" class="btn btn-dark">Apply</button>
+                <a href="{% url 'products:brand_list' %}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+
         {% if brands %}
         <div class="table-responsive">
             <table class="table table-hover align-middle">
@@ -37,10 +50,18 @@
                 </tbody>
             </table>
         </div>
+
+        {% include 'includes/pagination.html' with aria_label='Brands pagination' %}
         {% else %}
         <div class="text-center py-5">
-            <h3 class="h5 mb-2">No brands yet</h3>
-            <p class="text-secondary mb-4">Add your first brand to start organizing products.</p>
+            <h3 class="h5 mb-2">No brands found</h3>
+            <p class="text-secondary mb-4">
+                {% if search %}
+                Try a different search or add a new brand.
+                {% else %}
+                Add your first brand to start organizing products.
+                {% endif %}
+            </p>
             <a href="{% url 'products:brand_add' %}" class="btn btn-primary rounded-pill px-4">Add Brand</a>
         </div>
         {% endif %}
