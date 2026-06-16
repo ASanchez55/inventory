@@ -1,0 +1,59 @@
+.reports-page .table td,
+.reports-page .table th {
+    white-space: nowrap;
+}
+
+.report-stat-card {
+    height: 100%;
+    padding: 1.25rem;
+    border-radius: 1.25rem;
+    color: #fff;
+    box-shadow: 0 1rem 2rem rgba(15, 23, 42, 0.12);
+}
+
+.report-stat-card h3 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.35rem;
+}
+
+.report-stat-card-primary {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.report-stat-card-success {
+    background: linear-gradient(135deg, #0f766e, #0d9488);
+}
+
+.report-stat-card-warning {
+    background: linear-gradient(135deg, #d97706, #f59e0b);
+}
+
+.report-stat-card-dark {
+    background: linear-gradient(135deg, #334155, #0f172a);
+}
+
+.report-stat-label {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78rem;
+    font-weight: 700;
+    opacity: 0.85;
+    margin-bottom: 0.35rem;
+}
+
+.report-stat-meta {
+    margin: 0;
+    opacity: 0.9;
+}
+
+.report-progress {
+    height: 0.75rem;
+    border-radius: 999px;
+    background: #e2e8f0;
+}
+
+.report-progress .progress-bar {
+    background: linear-gradient(90deg, #2563eb, #60a5fa);
+    border-radius: 999px;
+}

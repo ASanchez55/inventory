@@ -5,6 +5,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/pages/users.css' %}">
+<link rel="stylesheet" href="{% static 'css/pages/reports.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -21,10 +22,46 @@
         {% if perms.inventory_app.access_inventory_module %}
         <a href="{% url 'inventory_app:inventory_list' %}" class="btn btn-outline-primary">View Inventory</a>
         {% endif %}
+        {% if perms.users.access_reports_module %}
+        <a href="{% url 'users:reports' %}" class="btn btn-outline-success">Open Reports</a>
+        {% endif %}
         {% if perms.users.access_users_module %}
         <a href="{% url 'users:user_list' %}" class="btn btn-outline-dark">Manage Users</a>
         {% endif %}
     </div>
+
+    {% if reports_snapshot %}
+    <div class="row g-4 mt-2">
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="report-stat-card report-stat-card-primary">
+                <p class="report-stat-label">Products</p>
+                <h3>{{ reports_snapshot.total_products }}</h3>
+                <p class="report-stat-meta">{{ reports_snapshot.total_categories }} categories &middot; {{ reports_snapshot.total_brands }} brands</p>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="report-stat-card report-stat-card-success">
+                <p class="report-stat-label">Units In Stock</p>
+                <h3>{{ reports_snapshot.units_in_stock }}</h3>
+                <p class="report-stat-meta">Inventory value: ${{ reports_snapshot.inventory_value|floatformat:2 }}</p>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="report-stat-card report-stat-card-warning">
+                <p class="report-stat-label">Low Stock</p>
+                <h3>{{ reports_snapshot.low_stock_count }}</h3>
+                <p class="report-stat-meta">Out of stock: {{ reports_snapshot.out_of_stock_count }}</p>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="report-stat-card report-stat-card-dark">
+                <p class="report-stat-label">Movements {{ reports_snapshot.window_label }}</p>
+                <h3>{{ reports_snapshot.stock_in_count }} / {{ reports_snapshot.stock_out_count }}</h3>
+                <p class="report-stat-meta">In / Out transaction count</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     </div>
 </div>
 {% endblock %}
