@@ -4,7 +4,7 @@ from django.db.models import Count, DecimalField, ExpressionWrapper, F, Q, Sum
 from django.utils import timezone
 
 from inventory_app.models import Inventory, StockMovement
-from products.models import Brand, Category, Product
+from products.models import Brand, Category, Product, Supplier
 
 
 def build_reports_snapshot():
@@ -18,6 +18,7 @@ def build_reports_snapshot():
         'total_products': Product.objects.count(),
         'total_categories': Category.objects.count(),
         'total_brands': Brand.objects.count(),
+        'total_suppliers': Supplier.objects.count(),
         'units_in_stock': Inventory.objects.aggregate(total=Sum('quantity'))['total'] or 0,
         'inventory_value': Inventory.objects.aggregate(total=Sum(inventory_value_expression))['total'] or 0,
         'low_stock_count': Inventory.objects.filter(quantity__lte=F('reorder_level')).count(),

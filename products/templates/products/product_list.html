@@ -17,10 +17,10 @@
             <div class="col-12 col-lg-4">
                 <label for="search" class="form-label fw-semibold">Search</label>
                 <input id="search" type="text" name="search" class="form-control"
-                    placeholder="Search by name or SKU" value="{{ search }}">
+                    placeholder="Search by name, SKU, or supplier" value="{{ search }}">
             </div>
 
-            <div class="col-12 col-md-6 col-lg-3">
+            <div class="col-12 col-md-6 col-lg-2">
                 <label for="category" class="form-label fw-semibold">Category</label>
                 <select id="category" name="category" class="form-select">
                     <option value="">All Categories</option>
@@ -32,13 +32,25 @@
                 </select>
             </div>
 
-            <div class="col-12 col-md-6 col-lg-3">
+            <div class="col-12 col-md-6 col-lg-2">
                 <label for="brand" class="form-label fw-semibold">Brand</label>
                 <select id="brand" name="brand" class="form-select">
                     <option value="">All Brands</option>
                     {% for brand in brands %}
                     <option value="{{ brand.id }}" {% if selected_brand_id == brand.id %}selected{% endif %}>
                         {{ brand.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-2">
+                <label for="supplier" class="form-label fw-semibold">Supplier</label>
+                <select id="supplier" name="supplier" class="form-select">
+                    <option value="">All Suppliers</option>
+                    {% for supplier in suppliers %}
+                    <option value="{{ supplier.id }}" {% if selected_supplier_id == supplier.id %}selected{% endif %}>
+                        {{ supplier.name }}
                     </option>
                     {% endfor %}
                 </select>
@@ -59,6 +71,7 @@
                         <th>SKU</th>
                         <th>Category</th>
                         <th>Brand</th>
+                        <th>Supplier</th>
                         <th>Price</th>
                         <th class="text-end">Actions</th>
                     </tr>
@@ -70,6 +83,7 @@
                         <td><span class="badge text-bg-light border">{{ product.sku }}</span></td>
                         <td>{{ product.category }}</td>
                         <td>{{ product.brand }}</td>
+                        <td>{{ product.supplier|default:'-' }}</td>
                         <td>${{ product.price|floatformat:2 }}</td>
                         <td class="text-end">
                             <a href="{% url 'products:product_edit' product.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>

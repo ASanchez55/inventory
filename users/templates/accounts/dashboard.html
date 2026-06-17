@@ -19,6 +19,9 @@
         {% if perms.products.access_products_module %}
         <a href="{% url 'products:product_list' %}" class="btn btn-primary">Manage Products</a>
         {% endif %}
+        {% if perms.products.access_suppliers_module %}
+        <a href="{% url 'products:supplier_list' %}" class="btn btn-outline-warning">Manage Suppliers</a>
+        {% endif %}
         {% if perms.inventory_app.access_inventory_module %}
         <a href="{% url 'inventory_app:inventory_list' %}" class="btn btn-outline-primary">View Inventory</a>
         {% endif %}
@@ -36,7 +39,7 @@
             <div class="report-stat-card report-stat-card-primary">
                 <p class="report-stat-label">Products</p>
                 <h3>{{ reports_snapshot.total_products }}</h3>
-                <p class="report-stat-meta">{{ reports_snapshot.total_categories }} categories &middot; {{ reports_snapshot.total_brands }} brands</p>
+                <p class="report-stat-meta">{{ reports_snapshot.total_categories }} categories &middot; {{ reports_snapshot.total_brands }} brands &middot; {{ reports_snapshot.total_suppliers }} suppliers</p>
             </div>
         </div>
         <div class="col-12 col-md-6 col-xl-3">

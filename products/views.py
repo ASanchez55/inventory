@@ -4,8 +4,8 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from core.utils import paginate_queryset
-from .forms import BrandForm, CategoryForm, ProductForm
-from .models import Category, Brand, Product
+from .forms import BrandForm, CategoryForm, ProductForm, SupplierForm
+from .models import Category, Brand, Product, Supplier
 
 from products.services import create_product
 
@@ -213,6 +213,101 @@ def brand_delete(request, pk):
         {'brand': brand},
     )
 
+
+# Supplier views
+@login_required
+@permission_required('products.access_suppliers_module', raise_exception=True)
+def supplier_list(request):
+    search = request.GET.get('search', '').strip()
+    suppliers = Supplier.objects.order_by('name')
+
+    if search:
+        suppliers = suppliers.filter(
+            Q(name__icontains=search)
+            | Q(contact_person__icontains=search)
+            | Q(email__icontains=search)
+            | Q(phone__icontains=search)
+        )
+
+    page_obj, pagination_query = paginate_queryset(request, suppliers)
+
+    return render(
+        request,
+        'products/supplier_list.html',
+        {
+            'suppliers': page_obj,
+            'page_obj': page_obj,
+            'search': search,
+            'pagination_query': pagination_query,
+        },
+    )
+
+
+@login_required
+@permission_required('products.access_suppliers_module', raise_exception=True)
+def supplier_create(request):
+    if request.method == 'POST':
+        form = SupplierForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Supplier added successfully.')
+            return redirect('products:supplier_list')
+    else:
+        form = SupplierForm()
+
+    return render(
+        request,
+        'products/supplier_form.html',
+        {
+            'form': form,
+            'page_title': 'Add Supplier',
+            'button_label': 'Save Supplier',
+        },
+    )
+
+
+@login_required
+@permission_required('products.access_suppliers_module', raise_exception=True)
+def supplier_update(request, pk):
+    supplier = get_object_or_404(Supplier, pk=pk)
+
+    if request.method == 'POST':
+        form = SupplierForm(request.POST, instance=supplier)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Supplier updated successfully.')
+            return redirect('products:supplier_list')
+    else:
+        form = SupplierForm(instance=supplier)
+
+    return render(
+        request,
+        'products/supplier_form.html',
+        {
+            'form': form,
+            'supplier': supplier,
+            'page_title': 'Edit Supplier',
+            'button_label': 'Update Supplier',
+        },
+    )
+
+
+@login_required
+@permission_required('products.access_suppliers_module', raise_exception=True)
+def supplier_delete(request, pk):
+    supplier = get_object_or_404(Supplier, pk=pk)
+
+    if request.method == 'POST':
+        supplier.delete()
+        messages.success(request, 'Supplier deleted successfully.')
+        return redirect('products:supplier_list')
+
+    return render(
+        request,
+        'products/supplier_confirm_delete.html',
+        {'supplier': supplier},
+    )
+
 # product views
 
 
@@ -222,16 +317,19 @@ def product_list(request):
     search = request.GET.get('search', '').strip()
     category_id = request.GET.get('category', '').strip()
     brand_id = request.GET.get('brand', '').strip()
+    supplier_id = request.GET.get('supplier', '').strip()
     selected_category_id = int(category_id) if category_id.isdigit() else None
     selected_brand_id = int(brand_id) if brand_id.isdigit() else None
+    selected_supplier_id = int(supplier_id) if supplier_id.isdigit() else None
 
     products = Product.objects.select_related(
-        'category', 'brand').order_by('name')
+        'category', 'brand', 'supplier').order_by('name')
 
     if search:
         products = products.filter(
-            Q(name__icontains=search) |
-            Q(sku__icontains=search)
+            Q(name__icontains=search)
+            | Q(sku__icontains=search)
+            | Q(supplier__name__icontains=search)
         )
 
     if category_id:
@@ -240,10 +338,14 @@ def product_list(request):
     if brand_id:
         products = products.filter(brand_id=brand_id)
 
+    if supplier_id:
+        products = products.filter(supplier_id=supplier_id)
+
     page_obj, pagination_query = paginate_queryset(request, products)
 
     categories = Category.objects.order_by('name')
     brands = Brand.objects.order_by('name')
+    suppliers = Supplier.objects.order_by('name')
 
     return render(
         request,
@@ -253,11 +355,14 @@ def product_list(request):
             'products': page_obj,
             'categories': categories,
             'brands': brands,
+            'suppliers': suppliers,
             'search': search,
             'selected_category': category_id,
             'selected_brand': brand_id,
+            'selected_supplier': supplier_id,
             'selected_category_id': selected_category_id,
             'selected_brand_id': selected_brand_id,
+            'selected_supplier_id': selected_supplier_id,
             'pagination_query': pagination_query,
         },
     )
@@ -274,6 +379,7 @@ def product_create(request):
                 sku=form.cleaned_data['sku'],
                 category=form.cleaned_data['category'],
                 brand=form.cleaned_data['brand'],
+                supplier=form.cleaned_data['supplier'],
                 price=form.cleaned_data['price'],
             )
             messages.success(request, 'Product added successfully.')
