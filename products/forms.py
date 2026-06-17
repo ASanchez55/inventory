@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Category, Brand, Product
+from .models import Category, Brand, Product, Supplier
 
 
 def apply_bootstrap_classes(form):
@@ -56,10 +56,32 @@ class BrandForm(forms.ModelForm):
         return name
 
 
+class SupplierForm(forms.ModelForm):
+    class Meta:
+        model = Supplier
+        fields = ['name', 'contact_person', 'email', 'phone', 'lead_time_days', 'notes']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        apply_bootstrap_classes(self)
+        self.fields['notes'].widget.attrs['rows'] = 4
+
+    def clean_name(self):
+        name = self.cleaned_data['name'].strip()
+        qs = Supplier.objects.filter(name__iexact=name)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+
+        if qs.exists():
+            raise forms.ValidationError(
+                "A supplier with this name already exists.")
+        return name
+
+
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['name', 'sku', 'category', 'brand', 'price']
+        fields = ['name', 'sku', 'category', 'brand', 'supplier', 'price']
 
     def clean_sku(self):
         sku = self.cleaned_data['sku'].strip()
@@ -76,4 +98,6 @@ class ProductForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['category'].queryset = Category.objects.order_by('name')
         self.fields['brand'].queryset = Brand.objects.order_by('name')
+        self.fields['supplier'].queryset = Supplier.objects.order_by('name')
+        self.fields['supplier'].required = False
         apply_bootstrap_classes(self)

@@ -34,6 +34,7 @@
                 <th>Username</th>
                 <th>Status</th>
                 <th>Product Access</th>
+                <th>Supplier Access</th>
                 <th>Inventory Access</th>
                 <th>Reports Access</th>
                 <th>Users Access</th>
@@ -53,6 +54,9 @@
                 </td>
                 <td>
                     {% if row.has_products_access %}Yes{% else %}No{% endif %}
+                </td>
+                <td>
+                    {% if row.has_suppliers_access %}Yes{% else %}No{% endif %}
                 </td>
                 <td>
                     {% if row.has_inventory_access %}Yes{% else %}No{% endif %}

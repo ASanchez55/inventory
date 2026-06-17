@@ -16,6 +16,11 @@ urlpatterns = [
     path('brands/add/', views.brand_create, name='brand_add'),
     path('brands/<int:pk>/edit/', views.brand_update, name='brand_edit'),
     path('brands/<int:pk>/delete/', views.brand_delete, name='brand_delete'),
+    # supplier URLs
+    path('suppliers/', views.supplier_list, name='supplier_list'),
+    path('suppliers/add/', views.supplier_create, name='supplier_add'),
+    path('suppliers/<int:pk>/edit/', views.supplier_update, name='supplier_edit'),
+    path('suppliers/<int:pk>/delete/', views.supplier_delete, name='supplier_delete'),
 
     # product URLs
     path('products/', views.product_list, name='product_list'),
