@@ -56,6 +56,9 @@ def user_list(request):
             'user': managed_user,
             'has_products_access': managed_user.has_perm('products.access_products_module'),
             'has_suppliers_access': managed_user.has_perm('products.access_suppliers_module'),
+            'has_purchase_orders_access': managed_user.has_perm(
+                'products.access_purchase_orders_module',
+            ),
             'has_inventory_access': managed_user.has_perm('inventory_app.access_inventory_module'),
             'has_users_access': managed_user.has_perm('users.access_users_module'),
             'has_reports_access': managed_user.has_perm('users.access_reports_module'),

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Delete Purchase Order{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/products.css' %}">
+{% endblock %}
+
+{% block content %}
+{% url 'products:purchase_order_detail' purchase_order.pk as cancel_url %}
+{% include 'includes/confirm_delete_card.html' with title='Delete Purchase Order' item_name=purchase_order.order_number cancel_url=cancel_url %}
+{% endblock %}

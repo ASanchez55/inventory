@@ -35,6 +35,9 @@
                     {% if perms.products.access_suppliers_module %}
                     <li class="nav-item"><a class="nav-link" href="{% url 'products:supplier_list' %}">Suppliers</a></li>
                     {% endif %}
+                    {% if perms.products.access_purchase_orders_module %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'products:purchase_order_list' %}">Purchase Orders</a></li>
+                    {% endif %}
                     {% if perms.inventory_app.access_inventory_module %}
                     <li class="nav-item"><a class="nav-link" href="{% url 'inventory_app:inventory_list' %}">Inventory</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'inventory_app:stock_movement_list' %}">Stock Movements</a></li>

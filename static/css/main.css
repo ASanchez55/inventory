@@ -71,6 +71,10 @@
     max-width: 44rem;
 }
 
+.page-card-lg {
+    max-width: 72rem;
+}
+
 .auth-card {
     max-width: 26rem;
 }
