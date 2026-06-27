@@ -9,6 +9,7 @@ User = get_user_model()
 MODULE_PERMISSION_FILTER = (
     Q(content_type__app_label='products', codename='access_products_module')
     | Q(content_type__app_label='products', codename='access_suppliers_module')
+    | Q(content_type__app_label='products', codename='access_purchase_orders_module')
     | Q(content_type__app_label='inventory_app', codename='access_inventory_module')
     | Q(content_type__app_label='users', codename='access_users_module')
     | Q(content_type__app_label='users', codename='access_reports_module')
@@ -82,6 +83,7 @@ class UserAccessForm(forms.ModelForm):
         labels = {
             ('products', 'access_products_module'): 'Products',
             ('products', 'access_suppliers_module'): 'Suppliers',
+            ('products', 'access_purchase_orders_module'): 'Purchase Orders',
             ('inventory_app', 'access_inventory_module'): 'Inventory',
             ('users', 'access_users_module'): 'Users',
             ('users', 'access_reports_module'): 'Reports',

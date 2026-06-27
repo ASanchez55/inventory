@@ -27,4 +27,12 @@ urlpatterns = [
     path('products/add/', views.product_create, name='product_add'),
     path('products/<int:pk>/edit/', views.product_update, name='product_edit'),
     path('products/<int:pk>/delete/', views.product_delete, name='product_delete'),
+
+    # purchase order URLs
+    path('purchase-orders/', views.purchase_order_list, name='purchase_order_list'),
+    path('purchase-orders/add/', views.purchase_order_create, name='purchase_order_add'),
+    path('purchase-orders/<int:pk>/', views.purchase_order_detail, name='purchase_order_detail'),
+    path('purchase-orders/<int:pk>/edit/', views.purchase_order_update, name='purchase_order_edit'),
+    path('purchase-orders/<int:pk>/receive/', views.purchase_order_receive, name='purchase_order_receive'),
+    path('purchase-orders/<int:pk>/delete/', views.purchase_order_delete, name='purchase_order_delete'),
 ]

@@ -1,15 +1,22 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
 from core.utils import paginate_queryset
-from .forms import BrandForm, CategoryForm, ProductForm, SupplierForm
-from .models import Category, Brand, Product, Supplier
 
-from products.services import create_product
-
-from django.db.models import Q
+from .forms import (
+    BrandForm,
+    CategoryForm,
+    ProductForm,
+    PurchaseOrderForm,
+    PurchaseOrderItemFormSet,
+    SupplierForm,
+)
+from .models import Brand, Category, Product, PurchaseOrder, Supplier
+from .services import create_product, receive_purchase_order, save_purchase_order
 
 
 def _build_lookup_payload(obj):
@@ -18,9 +25,20 @@ def _build_lookup_payload(obj):
         'name': obj.name,
     }
 
+
+def _purchase_order_form_context(form, formset, page_title, button_label, purchase_order=None):
+    return {
+        'form': form,
+        'formset': formset,
+        'purchase_order': purchase_order,
+        'page_title': page_title,
+        'button_label': button_label,
+        'has_products': Product.objects.exists(),
+        'has_suppliers': Supplier.objects.exists(),
+    }
+
+
 # Category views
-
-
 @login_required
 @permission_required('products.access_products_module', raise_exception=True)
 def category_list(request):
@@ -308,9 +326,8 @@ def supplier_delete(request, pk):
         {'supplier': supplier},
     )
 
-# product views
 
-
+# Product views
 @login_required
 @permission_required('products.access_products_module', raise_exception=True)
 def product_list(request):
@@ -323,7 +340,10 @@ def product_list(request):
     selected_supplier_id = int(supplier_id) if supplier_id.isdigit() else None
 
     products = Product.objects.select_related(
-        'category', 'brand', 'supplier').order_by('name')
+        'category',
+        'brand',
+        'supplier',
+    ).order_by('name')
 
     if search:
         products = products.filter(
@@ -438,4 +458,187 @@ def product_delete(request, pk):
         request,
         'products/product_confirm_delete.html',
         {'product': product},
+    )
+
+
+# Purchase order views
+@login_required
+@permission_required('products.access_purchase_orders_module', raise_exception=True)
+def purchase_order_list(request):
+    search = request.GET.get('search', '').strip()
+    status = request.GET.get('status', '').strip()
+    status_choices = PurchaseOrder.STATUS_CHOICES
+    valid_statuses = {value for value, _label in status_choices}
+    selected_status = status if status in valid_statuses else ''
+
+    purchase_orders = PurchaseOrder.objects.select_related(
+        'supplier',
+        'created_by',
+        'received_by',
+    ).prefetch_related('items__product')
+
+    if search:
+        purchase_orders = purchase_orders.filter(
+            Q(order_number__icontains=search)
+            | Q(supplier__name__icontains=search)
+            | Q(notes__icontains=search)
+        )
+
+    if selected_status:
+        purchase_orders = purchase_orders.filter(status=selected_status)
+
+    page_obj, pagination_query = paginate_queryset(request, purchase_orders)
+
+    return render(
+        request,
+        'products/purchase_order_list.html',
+        {
+            'purchase_orders': page_obj,
+            'page_obj': page_obj,
+            'search': search,
+            'status_choices': status_choices,
+            'selected_status': selected_status,
+            'pagination_query': pagination_query,
+        },
+    )
+
+
+@login_required
+@permission_required('products.access_purchase_orders_module', raise_exception=True)
+def purchase_order_create(request):
+    if request.method == 'POST':
+        form = PurchaseOrderForm(request.POST)
+        formset = PurchaseOrderItemFormSet(request.POST, prefix='items')
+        if form.is_valid() and formset.is_valid():
+            purchase_order = save_purchase_order(form, formset, request.user)
+            messages.success(
+                request,
+                f'Purchase order {purchase_order.order_number} created successfully.',
+            )
+            return redirect('products:purchase_order_detail', pk=purchase_order.pk)
+    else:
+        form = PurchaseOrderForm()
+        formset = PurchaseOrderItemFormSet(prefix='items')
+
+    return render(
+        request,
+        'products/purchase_order_form.html',
+        _purchase_order_form_context(
+            form=form,
+            formset=formset,
+            page_title='Create Purchase Order',
+            button_label='Save Purchase Order',
+        ),
+    )
+
+
+@login_required
+@permission_required('products.access_purchase_orders_module', raise_exception=True)
+def purchase_order_detail(request, pk):
+    purchase_order = get_object_or_404(
+        PurchaseOrder.objects.select_related(
+            'supplier',
+            'created_by',
+            'received_by',
+        ).prefetch_related('items__product'),
+        pk=pk,
+    )
+
+    return render(
+        request,
+        'products/purchase_order_detail.html',
+        {
+            'purchase_order': purchase_order,
+            'can_receive': purchase_order.status in {
+                PurchaseOrder.STATUS_DRAFT,
+                PurchaseOrder.STATUS_ORDERED,
+            },
+        },
+    )
+
+
+@login_required
+@permission_required('products.access_purchase_orders_module', raise_exception=True)
+def purchase_order_update(request, pk):
+    purchase_order = get_object_or_404(
+        PurchaseOrder.objects.prefetch_related('items__product'),
+        pk=pk,
+    )
+
+    if purchase_order.status == PurchaseOrder.STATUS_RECEIVED:
+        messages.warning(request, 'Received purchase orders can no longer be edited.')
+        return redirect('products:purchase_order_detail', pk=purchase_order.pk)
+
+    if request.method == 'POST':
+        form = PurchaseOrderForm(request.POST, instance=purchase_order)
+        formset = PurchaseOrderItemFormSet(
+            request.POST,
+            instance=purchase_order,
+            prefix='items',
+        )
+        if form.is_valid() and formset.is_valid():
+            purchase_order = save_purchase_order(form, formset, request.user)
+            messages.success(
+                request,
+                f'Purchase order {purchase_order.order_number} updated successfully.',
+            )
+            return redirect('products:purchase_order_detail', pk=purchase_order.pk)
+    else:
+        form = PurchaseOrderForm(instance=purchase_order)
+        formset = PurchaseOrderItemFormSet(instance=purchase_order, prefix='items')
+
+    return render(
+        request,
+        'products/purchase_order_form.html',
+        _purchase_order_form_context(
+            form=form,
+            formset=formset,
+            purchase_order=purchase_order,
+            page_title=f'Edit {purchase_order.order_number}',
+            button_label='Update Purchase Order',
+        ),
+    )
+
+
+@login_required
+@permission_required('products.access_purchase_orders_module', raise_exception=True)
+@require_POST
+def purchase_order_receive(request, pk):
+    purchase_order = get_object_or_404(PurchaseOrder, pk=pk)
+
+    try:
+        receive_purchase_order(purchase_order, request.user)
+    except ValueError as exc:
+        messages.error(request, str(exc))
+    else:
+        messages.success(
+            request,
+            f'Purchase order {purchase_order.order_number} was received successfully.',
+        )
+
+    return redirect('products:purchase_order_detail', pk=purchase_order.pk)
+
+
+@login_required
+@permission_required('products.access_purchase_orders_module', raise_exception=True)
+def purchase_order_delete(request, pk):
+    purchase_order = get_object_or_404(
+        PurchaseOrder.objects.select_related('supplier'),
+        pk=pk,
+    )
+
+    if purchase_order.status == PurchaseOrder.STATUS_RECEIVED:
+        messages.warning(request, 'Received purchase orders cannot be deleted.')
+        return redirect('products:purchase_order_detail', pk=purchase_order.pk)
+
+    if request.method == 'POST':
+        order_number = purchase_order.order_number
+        purchase_order.delete()
+        messages.success(request, f'Purchase order {order_number} deleted successfully.')
+        return redirect('products:purchase_order_list')
+
+    return render(
+        request,
+        'products/purchase_order_confirm_delete.html',
+        {'purchase_order': purchase_order},
     )

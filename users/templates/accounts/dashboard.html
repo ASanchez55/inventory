@@ -22,6 +22,9 @@
         {% if perms.products.access_suppliers_module %}
         <a href="{% url 'products:supplier_list' %}" class="btn btn-outline-warning">Manage Suppliers</a>
         {% endif %}
+        {% if perms.products.access_purchase_orders_module %}
+        <a href="{% url 'products:purchase_order_list' %}" class="btn btn-outline-secondary">Purchase Orders</a>
+        {% endif %}
         {% if perms.inventory_app.access_inventory_module %}
         <a href="{% url 'inventory_app:inventory_list' %}" class="btn btn-outline-primary">View Inventory</a>
         {% endif %}

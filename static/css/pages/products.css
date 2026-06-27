@@ -21,3 +21,13 @@
 .product-form .btn-outline-primary {
     white-space: nowrap;
 }
+
+.purchase-order-items-table th,
+.purchase-order-items-table td {
+    min-width: 10rem;
+}
+
+.purchase-order-items-table th:last-child,
+.purchase-order-items-table td:last-child {
+    min-width: 6rem;
+}
