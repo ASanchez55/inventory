@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from core.exporting import build_csv_response
 from core.utils import paginate_queryset
 
 from .forms import (
@@ -38,15 +39,84 @@ def _purchase_order_form_context(form, formset, page_title, button_label, purcha
     }
 
 
+def _get_category_queryset(search=''):
+    categories = Category.objects.order_by('name')
+    if search:
+        categories = categories.filter(name__icontains=search)
+    return categories
+
+
+def _get_brand_queryset(search=''):
+    brands = Brand.objects.order_by('name')
+    if search:
+        brands = brands.filter(name__icontains=search)
+    return brands
+
+
+def _get_supplier_queryset(search=''):
+    suppliers = Supplier.objects.order_by('name')
+    if search:
+        suppliers = suppliers.filter(
+            Q(name__icontains=search)
+            | Q(contact_person__icontains=search)
+            | Q(email__icontains=search)
+            | Q(phone__icontains=search)
+        )
+    return suppliers
+
+
+def _get_product_queryset(search='', category_id='', brand_id='', supplier_id=''):
+    products = Product.objects.select_related(
+        'category',
+        'brand',
+        'supplier',
+    ).order_by('name')
+
+    if search:
+        products = products.filter(
+            Q(name__icontains=search)
+            | Q(sku__icontains=search)
+            | Q(supplier__name__icontains=search)
+        )
+
+    if category_id:
+        products = products.filter(category_id=category_id)
+
+    if brand_id:
+        products = products.filter(brand_id=brand_id)
+
+    if supplier_id:
+        products = products.filter(supplier_id=supplier_id)
+
+    return products
+
+
+def _get_purchase_order_queryset(search='', status=''):
+    purchase_orders = PurchaseOrder.objects.select_related(
+        'supplier',
+        'created_by',
+        'received_by',
+    ).prefetch_related('items__product')
+
+    if search:
+        purchase_orders = purchase_orders.filter(
+            Q(order_number__icontains=search)
+            | Q(supplier__name__icontains=search)
+            | Q(notes__icontains=search)
+        )
+
+    if status:
+        purchase_orders = purchase_orders.filter(status=status)
+
+    return purchase_orders
+
+
 # Category views
 @login_required
 @permission_required('products.access_products_module', raise_exception=True)
 def category_list(request):
     search = request.GET.get('search', '').strip()
-    categories = Category.objects.order_by('name')
-
-    if search:
-        categories = categories.filter(name__icontains=search)
+    categories = _get_category_queryset(search)
 
     page_obj, pagination_query = paginate_queryset(request, categories)
 
@@ -140,10 +210,7 @@ def category_delete(request, pk):
 @permission_required('products.access_products_module', raise_exception=True)
 def brand_list(request):
     search = request.GET.get('search', '').strip()
-    brands = Brand.objects.order_by('name')
-
-    if search:
-        brands = brands.filter(name__icontains=search)
+    brands = _get_brand_queryset(search)
 
     page_obj, pagination_query = paginate_queryset(request, brands)
 
@@ -237,15 +304,7 @@ def brand_delete(request, pk):
 @permission_required('products.access_suppliers_module', raise_exception=True)
 def supplier_list(request):
     search = request.GET.get('search', '').strip()
-    suppliers = Supplier.objects.order_by('name')
-
-    if search:
-        suppliers = suppliers.filter(
-            Q(name__icontains=search)
-            | Q(contact_person__icontains=search)
-            | Q(email__icontains=search)
-            | Q(phone__icontains=search)
-        )
+    suppliers = _get_supplier_queryset(search)
 
     page_obj, pagination_query = paginate_queryset(request, suppliers)
 
@@ -259,6 +318,29 @@ def supplier_list(request):
             'pagination_query': pagination_query,
         },
     )
+
+
+@login_required
+@permission_required('products.access_suppliers_module', raise_exception=True)
+def supplier_export(request):
+    search = request.GET.get('search', '').strip()
+    suppliers = _get_supplier_queryset(search)
+
+    rows = [
+        ['Name', 'Contact Person', 'Email', 'Phone', 'Lead Time (Days)', 'Notes'],
+    ]
+    rows.extend(
+        [
+            supplier.name,
+            supplier.contact_person,
+            supplier.email,
+            supplier.phone,
+            supplier.lead_time_days,
+            supplier.notes,
+        ]
+        for supplier in suppliers
+    )
+    return build_csv_response('suppliers', rows)
 
 
 @login_required
@@ -339,27 +421,7 @@ def product_list(request):
     selected_brand_id = int(brand_id) if brand_id.isdigit() else None
     selected_supplier_id = int(supplier_id) if supplier_id.isdigit() else None
 
-    products = Product.objects.select_related(
-        'category',
-        'brand',
-        'supplier',
-    ).order_by('name')
-
-    if search:
-        products = products.filter(
-            Q(name__icontains=search)
-            | Q(sku__icontains=search)
-            | Q(supplier__name__icontains=search)
-        )
-
-    if category_id:
-        products = products.filter(category_id=category_id)
-
-    if brand_id:
-        products = products.filter(brand_id=brand_id)
-
-    if supplier_id:
-        products = products.filter(supplier_id=supplier_id)
+    products = _get_product_queryset(search, category_id, brand_id, supplier_id)
 
     page_obj, pagination_query = paginate_queryset(request, products)
 
@@ -386,6 +448,32 @@ def product_list(request):
             'pagination_query': pagination_query,
         },
     )
+
+
+@login_required
+@permission_required('products.access_products_module', raise_exception=True)
+def product_export(request):
+    search = request.GET.get('search', '').strip()
+    category_id = request.GET.get('category', '').strip()
+    brand_id = request.GET.get('brand', '').strip()
+    supplier_id = request.GET.get('supplier', '').strip()
+    products = _get_product_queryset(search, category_id, brand_id, supplier_id)
+
+    rows = [
+        ['Name', 'SKU', 'Category', 'Brand', 'Supplier', 'Price'],
+    ]
+    rows.extend(
+        [
+            product.name,
+            product.sku,
+            product.category.name,
+            product.brand.name,
+            product.supplier.name if product.supplier else '',
+            f'{product.price:.2f}',
+        ]
+        for product in products
+    )
+    return build_csv_response('products', rows)
 
 
 @login_required
@@ -470,22 +558,7 @@ def purchase_order_list(request):
     status_choices = PurchaseOrder.STATUS_CHOICES
     valid_statuses = {value for value, _label in status_choices}
     selected_status = status if status in valid_statuses else ''
-
-    purchase_orders = PurchaseOrder.objects.select_related(
-        'supplier',
-        'created_by',
-        'received_by',
-    ).prefetch_related('items__product')
-
-    if search:
-        purchase_orders = purchase_orders.filter(
-            Q(order_number__icontains=search)
-            | Q(supplier__name__icontains=search)
-            | Q(notes__icontains=search)
-        )
-
-    if selected_status:
-        purchase_orders = purchase_orders.filter(status=selected_status)
+    purchase_orders = _get_purchase_order_queryset(search, selected_status)
 
     page_obj, pagination_query = paginate_queryset(request, purchase_orders)
 
@@ -501,6 +574,49 @@ def purchase_order_list(request):
             'pagination_query': pagination_query,
         },
     )
+
+
+@login_required
+@permission_required('products.access_purchase_orders_module', raise_exception=True)
+def purchase_order_export(request):
+    search = request.GET.get('search', '').strip()
+    status = request.GET.get('status', '').strip()
+    valid_statuses = {value for value, _label in PurchaseOrder.STATUS_CHOICES}
+    selected_status = status if status in valid_statuses else ''
+    purchase_orders = _get_purchase_order_queryset(search, selected_status)
+
+    rows = [
+        [
+            'Order Number',
+            'Supplier',
+            'Status',
+            'Order Date',
+            'Expected Date',
+            'Items',
+            'Total Amount',
+            'Created By',
+            'Received By',
+            'Received At',
+        ],
+    ]
+    rows.extend(
+        [
+            purchase_order.order_number,
+            purchase_order.supplier.name,
+            purchase_order.get_status_display(),
+            purchase_order.order_date.isoformat(),
+            purchase_order.expected_date.isoformat() if purchase_order.expected_date else '',
+            purchase_order.items.count(),
+            f'{purchase_order.total_amount:.2f}',
+            purchase_order.created_by.username if purchase_order.created_by else '',
+            purchase_order.received_by.username if purchase_order.received_by else '',
+            purchase_order.received_at.strftime('%Y-%m-%d %H:%M:%S')
+            if purchase_order.received_at
+            else '',
+        ]
+        for purchase_order in purchase_orders
+    )
+    return build_csv_response('purchase_orders', rows)
 
 
 @login_required

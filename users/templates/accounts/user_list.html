@@ -13,6 +13,13 @@
     <h2 class="h3 mb-2">User Access</h2>
     <p class="text-secondary mb-4">Activate pending users and choose which modules they can access.</p>
 
+    <div class="inline-actions mb-4">
+        <a href="{% url 'users:user_export' %}{% if pagination_query %}?{{ pagination_query }}{% endif %}"
+            class="btn btn-outline-success rounded-pill px-4">
+            Export CSV
+        </a>
+    </div>
+
     <form method="get" class="row g-3 align-items-end mb-4">
         <div class="col-12 col-lg-6">
             <label for="search" class="form-label fw-semibold">Search</label>
