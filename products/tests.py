@@ -2,7 +2,9 @@ from datetime import timedelta
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
 from django.test import TestCase
+from django.urls import reverse
 from django.utils import timezone
 
 from inventory_app.models import Inventory, StockMovement
@@ -72,3 +74,46 @@ class PurchaseOrderFormTests(TestCase):
 
         self.assertFalse(form.is_valid())
         self.assertIn('expected_date', form.errors)
+
+
+class ProductExportViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='exporter', password='testpass123')
+        permission = Permission.objects.get(codename='access_products_module')
+        self.user.user_permissions.add(permission)
+        self.client.force_login(self.user)
+
+        self.category_one = Category.objects.create(name='Monitors')
+        self.category_two = Category.objects.create(name='Accessories')
+        self.brand = Brand.objects.create(name='Dell')
+        self.supplier = Supplier.objects.create(name='Office Supply Co')
+
+        Product.objects.create(
+            name='UltraSharp',
+            sku='DELL-U1',
+            category=self.category_one,
+            brand=self.brand,
+            supplier=self.supplier,
+            price=Decimal('399.99'),
+        )
+        Product.objects.create(
+            name='Docking Station',
+            sku='DELL-D1',
+            category=self.category_two,
+            brand=self.brand,
+            supplier=self.supplier,
+            price=Decimal('189.99'),
+        )
+
+    def test_product_export_respects_filters(self):
+        response = self.client.get(
+            reverse('products:product_export'),
+            {'category': self.category_one.pk},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'text/csv; charset=utf-8')
+
+        content = response.content.decode('utf-8-sig')
+        self.assertIn('UltraSharp', content)
+        self.assertNotIn('Docking Station', content)

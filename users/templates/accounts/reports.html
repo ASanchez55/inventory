@@ -9,9 +9,10 @@
 
 {% block content %}
 <section class="reports-page">
+    {% url 'users:reports_export' as reports_export_url %}
     <div class="card border-0 shadow-sm overflow-hidden mb-4">
         <div class="card-body p-4 p-lg-5">
-            {% include 'includes/page_header.html' with kicker='Analytics' title='Reports & Dashboard Analytics' description='Track inventory health, stock activity, and product coverage across the system.' %}
+            {% include 'includes/page_header.html' with kicker='Analytics' title='Reports & Dashboard Analytics' description='Track inventory health, stock activity, and product coverage across the system.' action_url=reports_export_url action_label='Export CSV' action_class='btn btn-outline-success rounded-pill px-4' %}
 
             <div class="row g-4 mt-2">
                 <div class="col-12 col-md-6 col-xl-3">

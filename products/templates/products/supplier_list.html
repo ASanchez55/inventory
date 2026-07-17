@@ -13,6 +13,13 @@
     <div class="card-body p-4 p-lg-5">
         {% include 'includes/page_header.html' with kicker='Partners' title='Suppliers' description='Track supplier contacts, lead times, and sourcing notes for your products.' action_url=supplier_add_url action_label='Add Supplier' %}
 
+        <div class="inline-actions mb-4">
+            <a href="{% url 'products:supplier_export' %}{% if pagination_query %}?{{ pagination_query }}{% endif %}"
+                class="btn btn-outline-success rounded-pill px-4">
+                Export CSV
+            </a>
+        </div>
+
         <form method="get" class="row g-3 align-items-end mb-4">
             <div class="col-12 col-lg-6">
                 <label for="search" class="form-label fw-semibold">Search</label>

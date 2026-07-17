@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import get_object_or_404, redirect, render
 
+from core.exporting import build_csv_response
 from core.utils import paginate_queryset
 from .models import Inventory, StockMovement
 from .forms import InventoryForm, StockMovementForm
@@ -17,17 +18,7 @@ from django.db.models import Q, F
 # Create your views here.
 
 
-@login_required
-@permission_required('inventory_app.access_inventory_module', raise_exception=True)
-def inventory_list(request):
-    search = request.GET.get('search', '').strip()
-    category_id = request.GET.get('category', '').strip()
-    brand_id = request.GET.get('brand', '').strip()
-    stock_status = request.GET.get('stock_status', '').strip()
-
-    selected_category_id = int(category_id) if category_id.isdigit() else None
-    selected_brand_id = int(brand_id) if brand_id.isdigit() else None
-
+def _get_inventory_queryset(search='', category_id='', brand_id='', stock_status=''):
     inventory = Inventory.objects.select_related(
         'product',
         'product__category',
@@ -51,6 +42,48 @@ def inventory_list(request):
     elif stock_status == 'ok':
         inventory = inventory.filter(quantity__gt=F('reorder_level'))
 
+    return inventory
+
+
+def _get_stock_movement_queryset(search=''):
+    movements = StockMovement.objects.select_related(
+        'product',
+        'user',
+    ).order_by('-created_at')
+
+    if search:
+        movements = movements.filter(
+            Q(product__name__icontains=search)
+            | Q(product__sku__icontains=search)
+            | Q(reference__icontains=search)
+            | Q(user__username__icontains=search)
+            | Q(user__first_name__icontains=search)
+            | Q(user__last_name__icontains=search)
+            | Q(movement_type__icontains=search)
+        )
+
+    return movements
+
+
+def _get_user_display(user):
+    if not user:
+        return ''
+    return user.get_full_name() or user.username
+
+
+@login_required
+@permission_required('inventory_app.access_inventory_module', raise_exception=True)
+def inventory_list(request):
+    search = request.GET.get('search', '').strip()
+    category_id = request.GET.get('category', '').strip()
+    brand_id = request.GET.get('brand', '').strip()
+    stock_status = request.GET.get('stock_status', '').strip()
+
+    selected_category_id = int(category_id) if category_id.isdigit() else None
+    selected_brand_id = int(brand_id) if brand_id.isdigit() else None
+
+    inventory = _get_inventory_queryset(search, category_id, brand_id, stock_status)
+
     page_obj, pagination_query = paginate_queryset(request, inventory)
 
     categories = Category.objects.order_by('name')
@@ -73,6 +106,33 @@ def inventory_list(request):
             'pagination_query': pagination_query,
         },
     )
+
+
+@login_required
+@permission_required('inventory_app.access_inventory_module', raise_exception=True)
+def inventory_export(request):
+    search = request.GET.get('search', '').strip()
+    category_id = request.GET.get('category', '').strip()
+    brand_id = request.GET.get('brand', '').strip()
+    stock_status = request.GET.get('stock_status', '').strip()
+    inventory = _get_inventory_queryset(search, category_id, brand_id, stock_status)
+
+    rows = [
+        ['Product', 'SKU', 'Category', 'Brand', 'Quantity', 'Reorder Level', 'Status'],
+    ]
+    rows.extend(
+        [
+            item.product.name,
+            item.product.sku,
+            item.product.category.name,
+            item.product.brand.name,
+            item.quantity,
+            item.reorder_level,
+            'Low Stock' if item.quantity <= item.reorder_level else 'OK',
+        ]
+        for item in inventory
+    )
+    return build_csv_response('inventory', rows)
 
 
 @login_required
@@ -108,19 +168,7 @@ def inventory_edit(request, pk):
 @permission_required('inventory_app.access_inventory_module', raise_exception=True)
 def stock_movement_list(request):
     search = request.GET.get('search', '').strip()
-    movements = StockMovement.objects.select_related(
-        'product', 'user').order_by('-created_at')
-
-    if search:
-        movements = movements.filter(
-            Q(product__name__icontains=search)
-            | Q(product__sku__icontains=search)
-            | Q(reference__icontains=search)
-            | Q(user__username__icontains=search)
-            | Q(user__first_name__icontains=search)
-            | Q(user__last_name__icontains=search)
-            | Q(movement_type__icontains=search)
-        )
+    movements = _get_stock_movement_queryset(search)
 
     page_obj, pagination_query = paginate_queryset(request, movements)
 
@@ -134,6 +182,30 @@ def stock_movement_list(request):
             'pagination_query': pagination_query,
         },
     )
+
+
+@login_required
+@permission_required('inventory_app.access_inventory_module', raise_exception=True)
+def stock_movement_export(request):
+    search = request.GET.get('search', '').strip()
+    movements = _get_stock_movement_queryset(search)
+
+    rows = [
+        ['Product', 'SKU', 'Type', 'Quantity', 'Reference', 'User', 'Date'],
+    ]
+    rows.extend(
+        [
+            movement.product.name,
+            movement.product.sku,
+            movement.get_movement_type_display(),
+            movement.quantity,
+            movement.reference or '',
+            _get_user_display(movement.user),
+            movement.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        ]
+        for movement in movements
+    )
+    return build_csv_response('stock_movements', rows)
 
 
 @login_required
