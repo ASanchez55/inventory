@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ purchase_order.order_number }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/products.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="card border-0 shadow-sm rounded-4 overflow-hidden product-page">
+    <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-4">
+            <div>
+                <p class="text-uppercase small fw-semibold text-primary mb-2">Procurement</p>
+                <h2 class="h3 mb-1">{{ purchase_order.order_number }}</h2>
+                <p class="text-secondary mb-0">Supplier order details and receiving history.</p>
+            </div>
+            <div class="inline-actions">
+                <a href="{% url 'products:purchase_order_list' %}" class="btn btn-outline-secondary">Back to List</a>
+                {% if purchase_order.status != 'RECEIVED' %}
+                <a href="{% url 'products:purchase_order_edit' purchase_order.pk %}" class="btn btn-outline-primary">Edit</a>
+                {% endif %}
+                {% if can_receive %}
+                <form method="post" action="{% url 'products:purchase_order_receive' purchase_order.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">Receive Stock</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="border rounded-4 p-3 h-100 bg-light-subtle">
+                    <p class="text-secondary small mb-1">Supplier</p>
+                    <p class="fw-semibold mb-0">{{ purchase_order.supplier.name }}</p>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="border rounded-4 p-3 h-100 bg-light-subtle">
+                    <p class="text-secondary small mb-1">Status</p>
+                    <p class="mb-0">
+                        {% if purchase_order.status == 'DRAFT' %}
+                        <span class="badge text-bg-secondary">Draft</span>
+                        {% elif purchase_order.status == 'ORDERED' %}
+                        <span class="badge text-bg-primary">Ordered</span>
+                        {% elif purchase_order.status == 'RECEIVED' %}
+                        <span class="badge text-bg-success">Received</span>
+                        {% else %}
+                        <span class="badge text-bg-danger">Cancelled</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="border rounded-4 p-3 h-100 bg-light-subtle">
+                    <p class="text-secondary small mb-1">Order Date</p>
+                    <p class="fw-semibold mb-0">{{ purchase_order.order_date|date:"M d, Y" }}</p>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="border rounded-4 p-3 h-100 bg-light-subtle">
+                    <p class="text-secondary small mb-1">Expected Date</p>
+                    <p class="fw-semibold mb-0">{{ purchase_order.expected_date|date:"M d, Y"|default:'-' }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-lg-6">
+                <div class="border rounded-4 p-3 h-100">
+                    <h3 class="h6 mb-3">Order Summary</h3>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5 text-secondary">Created By</dt>
+                        <dd class="col-sm-7">{{ purchase_order.created_by|default:'-' }}</dd>
+                        <dt class="col-sm-5 text-secondary">Received By</dt>
+                        <dd class="col-sm-7">{{ purchase_order.received_by|default:'-' }}</dd>
+                        <dt class="col-sm-5 text-secondary">Received At</dt>
+                        <dd class="col-sm-7">{{ purchase_order.received_at|date:"M d, Y H:i"|default:'-' }}</dd>
+                        <dt class="col-sm-5 text-secondary">Total Amount</dt>
+                        <dd class="col-sm-7 fw-semibold">${{ purchase_order.total_amount|floatformat:2 }}</dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <div class="border rounded-4 p-3 h-100">
+                    <h3 class="h6 mb-3">Notes</h3>
+                    <p class="mb-0 text-secondary">{{ purchase_order.notes|default:'No notes added.' }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Product</th>
+                        <th class="text-end">Quantity</th>
+                        <th class="text-end">Unit Cost</th>
+                        <th class="text-end">Line Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in purchase_order.items.all %}
+                    <tr>
+                        <td class="fw-semibold">{{ item.product.name }}</td>
+                        <td class="text-end">{{ item.quantity_ordered }}</td>
+                        <td class="text-end">${{ item.unit_cost|floatformat:2 }}</td>
+                        <td class="text-end">${{ item.line_total|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-secondary py-4">No items added yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if purchase_order.status != 'RECEIVED' %}
+        <div class="inline-actions mt-4">
+            <a href="{% url 'products:purchase_order_delete' purchase_order.pk %}" class="btn btn-outline-danger">Delete Purchase Order</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Delete Brand{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/products.css' %}">
+{% endblock %}
+
+{% block content %}
+{% url 'products:brand_list' as cancel_url %}
+{% include 'includes/confirm_delete_card.html' with title='Delete Brand' item_name=brand.name cancel_url=cancel_url %}
+{% endblock %}

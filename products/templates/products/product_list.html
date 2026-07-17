@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Products{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/products.css' %}">
+{% endblock %}
+
+{% block content %}
+{% url 'products:product_add' as product_add_url %}
+<section class="card border-0 shadow-sm rounded-4 overflow-hidden product-page">
+    <div class="card-body p-4 p-lg-5">
+        {% include 'includes/page_header.html' with kicker='Catalog' title='Products' description='Search the catalog, filter by category or brand, and manage product records.' action_url=product_add_url action_label='Add Product' %}
+
+        <div class="inline-actions mb-4">
+            <a href="{% url 'products:product_export' %}{% if pagination_query %}?{{ pagination_query }}{% endif %}"
+                class="btn btn-outline-success rounded-pill px-4">
+                Export CSV
+            </a>
+        </div>
+
+        <form method="get" class="row g-3 align-items-end mb-4">
+            <div class="col-12 col-lg-4">
+                <label for="search" class="form-label fw-semibold">Search</label>
+                <input id="search" type="text" name="search" class="form-control"
+                    placeholder="Search by name, SKU, or supplier" value="{{ search }}">
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-2">
+                <label for="category" class="form-label fw-semibold">Category</label>
+                <select id="category" name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}" {% if selected_category_id == category.id %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-2">
+                <label for="brand" class="form-label fw-semibold">Brand</label>
+                <select id="brand" name="brand" class="form-select">
+                    <option value="">All Brands</option>
+                    {% for brand in brands %}
+                    <option value="{{ brand.id }}" {% if selected_brand_id == brand.id %}selected{% endif %}>
+                        {{ brand.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-2">
+                <label for="supplier" class="form-label fw-semibold">Supplier</label>
+                <select id="supplier" name="supplier" class="form-select">
+                    <option value="">All Suppliers</option>
+                    {% for supplier in suppliers %}
+                    <option value="{{ supplier.id }}" {% if selected_supplier_id == supplier.id %}selected{% endif %}>
+                        {{ supplier.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-12 col-lg-2 d-grid gap-2">
+                <button type="submit" class="btn btn-dark">Apply</button>
+                <a href="{% url 'products:product_list' %}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+
+        {% if products %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>SKU</th>
+                        <th>Category</th>
+                        <th>Brand</th>
+                        <th>Supplier</th>
+                        <th>Price</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td class="fw-semibold">{{ product.name }}</td>
+                        <td><span class="badge text-bg-light border">{{ product.sku }}</span></td>
+                        <td>{{ product.category }}</td>
+                        <td>{{ product.brand }}</td>
+                        <td>{{ product.supplier|default:'-' }}</td>
+                        <td>${{ product.price|floatformat:2 }}</td>
+                        <td class="text-end">
+                            <a href="{% url 'products:product_edit' product.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <a href="{% url 'products:product_delete' product.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% include 'includes/pagination.html' with aria_label='Products pagination' %}
+        {% else %}
+        <div class="text-center py-5">
+            <h3 class="h5 mb-2">No products found</h3>
+            <p class="text-secondary mb-4">Try adjusting the filters or add your first product.</p>
+            <a href="{% url 'products:product_add' %}" class="btn btn-primary rounded-pill px-4">Add Product</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

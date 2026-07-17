@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Categories{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/products.css' %}">
+{% endblock %}
+
+{% block content %}
+{% url 'products:category_add' as category_add_url %}
+<section class="card border-0 shadow-sm rounded-4 overflow-hidden product-list-page">
+    <div class="card-body p-4 p-lg-5">
+        {% include 'includes/page_header.html' with kicker='Catalog' title='Categories' description='Organize your products into clear, searchable categories.' action_url=category_add_url action_label='Add Category' %}
+
+        <form method="get" class="row g-3 align-items-end mb-4">
+            <div class="col-12 col-lg-6">
+                <label for="search" class="form-label fw-semibold">Search</label>
+                <input id="search" type="text" name="search" class="form-control"
+                    placeholder="Search categories by name" value="{{ search }}">
+            </div>
+
+            <div class="col-12 col-lg-3 d-grid gap-2">
+                <button type="submit" class="btn btn-dark">Apply</button>
+                <a href="{% url 'products:category_list' %}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+
+        {% if categories %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}
+                    <tr>
+                        <td class="fw-semibold">{{ category.name }}</td>
+                        <td class="text-end">
+                            <div class="inline-actions justify-content-end">
+                                <a href="{% url 'products:category_edit' category.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <a href="{% url 'products:category_delete' category.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% include 'includes/pagination.html' with aria_label='Categories pagination' %}
+        {% else %}
+        <div class="text-center py-5">
+            <h3 class="h5 mb-2">No categories found</h3>
+            <p class="text-secondary mb-4">
+                {% if search %}
+                Try a different search or add a new category.
+                {% else %}
+                Add categories to group and filter products more easily.
+                {% endif %}
+            </p>
+            <a href="{% url 'products:category_add' %}" class="btn btn-primary rounded-pill px-4">Add Category</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

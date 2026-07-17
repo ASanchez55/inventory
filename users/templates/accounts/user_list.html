@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Users - Inventory System{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/users.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm users-page">
+    <div class="card-body p-4 p-lg-5">
+    <h2 class="h3 mb-2">User Access</h2>
+    <p class="text-secondary mb-4">Activate pending users and choose which modules they can access.</p>
+
+    <div class="inline-actions mb-4">
+        <a href="{% url 'users:user_export' %}{% if pagination_query %}?{{ pagination_query }}{% endif %}"
+            class="btn btn-outline-success rounded-pill px-4">
+            Export CSV
+        </a>
+    </div>
+
+    <form method="get" class="row g-3 align-items-end mb-4">
+        <div class="col-12 col-lg-6">
+            <label for="search" class="form-label fw-semibold">Search</label>
+            <input id="search" type="text" name="search" class="form-control"
+                placeholder="Search by username, name, or email" value="{{ search }}">
+        </div>
+
+        <div class="col-12 col-lg-3 d-grid gap-2">
+            <button type="submit" class="btn btn-dark">Apply</button>
+            <a href="{% url 'users:user_list' %}" class="btn btn-outline-secondary">Clear</a>
+        </div>
+    </form>
+
+    {% if user_rows %}
+    <div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Username</th>
+                <th>Status</th>
+                <th>Product Access</th>
+                <th>Supplier Access</th>
+                <th>Purchase Orders</th>
+                <th>Inventory Access</th>
+                <th>Reports Access</th>
+                <th>Users Access</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in user_rows %}
+            <tr>
+                <td class="fw-semibold">{{ row.user.username }}</td>
+                <td>
+                    {% if row.user.is_active %}
+                    <span class="badge text-bg-success">Active</span>
+                    {% else %}
+                    <span class="badge text-bg-warning">Pending</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if row.has_products_access %}Yes{% else %}No{% endif %}
+                </td>
+                <td>
+                    {% if row.has_suppliers_access %}Yes{% else %}No{% endif %}
+                </td>
+                <td>
+                    {% if row.has_purchase_orders_access %}Yes{% else %}No{% endif %}
+                </td>
+                <td>
+                    {% if row.has_inventory_access %}Yes{% else %}No{% endif %}
+                </td>
+                <td>
+                    {% if row.has_reports_access %}Yes{% else %}No{% endif %}
+                </td>
+                <td>
+                    {% if row.has_users_access %}Yes{% else %}No{% endif %}
+                </td>
+                <td class="text-end">
+                    <a href="{% url 'users:user_access_update' row.user.pk %}" class="btn btn-sm btn-outline-primary">Review Access</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% include 'includes/pagination.html' with aria_label='Users pagination' %}
+    {% else %}
+    <p class="mb-0">
+        {% if search %}
+        No users matched your search.
+        {% else %}
+        No users found.
+        {% endif %}
+    </p>
+    {% endif %}
+    </div>
+</div>
+{% endblock %}

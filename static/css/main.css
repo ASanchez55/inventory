@@ -1,0 +1,98 @@
+﻿body.app-body {
+    min-height: 100vh;
+    font-family: "Manrope", sans-serif;
+    background:
+        radial-gradient(circle at top left, rgba(255, 193, 7, 0.16), transparent 28%),
+        linear-gradient(180deg, #f7f7f2 0%, #eef2f7 100%);
+    color: #1f2937;
+}
+
+.app-navbar {
+    background: linear-gradient(90deg, #132238 0%, #21466b 100%);
+    box-shadow: 0 0.75rem 2rem rgba(19, 34, 56, 0.16);
+}
+
+.app-navbar .navbar-brand,
+.app-navbar .nav-link,
+.app-navbar .navbar-toggler {
+    color: #f8fafc;
+}
+
+.app-navbar .nav-link:hover,
+.app-navbar .nav-link:focus {
+    color: #ffd166;
+}
+
+.app-navbar .navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.app-navbar .navbar-toggler-icon {
+    filter: invert(1);
+}
+
+.hero-shell {
+    margin-bottom: 1.5rem;
+}
+
+.hero-card {
+    padding: 2rem;
+    border-radius: 1.75rem;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(247, 250, 252, 0.92)),
+        linear-gradient(135deg, #f4c95d, #f76c5e);
+    box-shadow: 0 1.5rem 3rem rgba(31, 41, 55, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+}
+
+.hero-kicker {
+    letter-spacing: 0.12em;
+    color: #d97706;
+}
+
+.card {
+    border-radius: 1.5rem;
+}
+
+.table > :not(caption) > * > * {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.app-footer {
+    background: #132238;
+}
+
+.page-card-sm {
+    max-width: 32rem;
+}
+
+.page-card-md {
+    max-width: 44rem;
+}
+
+.page-card-lg {
+    max-width: 72rem;
+}
+
+.auth-card {
+    max-width: 26rem;
+}
+
+.auth-submit,
+.btn-full {
+    width: 100%;
+}
+
+.inline-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.field-error {
+    margin-top: 0.35rem;
+    color: #dc3545;
+    font-size: 0.875rem;
+}

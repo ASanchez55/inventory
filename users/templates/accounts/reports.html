@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reports - Inventory System{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/reports.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="reports-page">
+    {% url 'users:reports_export' as reports_export_url %}
+    <div class="card border-0 shadow-sm overflow-hidden mb-4">
+        <div class="card-body p-4 p-lg-5">
+            {% include 'includes/page_header.html' with kicker='Analytics' title='Reports & Dashboard Analytics' description='Track inventory health, stock activity, and product coverage across the system.' action_url=reports_export_url action_label='Export CSV' action_class='btn btn-outline-success rounded-pill px-4' %}
+
+            <div class="row g-4 mt-2">
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="report-stat-card report-stat-card-primary">
+                        <p class="report-stat-label">Products</p>
+                        <h3>{{ reports_snapshot.total_products }}</h3>
+                        <p class="report-stat-meta">{{ reports_snapshot.total_categories }} categories &middot; {{ reports_snapshot.total_brands }} brands &middot; {{ reports_snapshot.total_suppliers }} suppliers</p>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="report-stat-card report-stat-card-success">
+                        <p class="report-stat-label">Units In Stock</p>
+                        <h3>{{ reports_snapshot.units_in_stock }}</h3>
+                        <p class="report-stat-meta">Inventory value: ${{ reports_snapshot.inventory_value|floatformat:2 }}</p>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="report-stat-card report-stat-card-warning">
+                        <p class="report-stat-label">Low Stock</p>
+                        <h3>{{ reports_snapshot.low_stock_count }}</h3>
+                        <p class="report-stat-meta">Out of stock: {{ reports_snapshot.out_of_stock_count }}</p>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="report-stat-card report-stat-card-dark">
+                        <p class="report-stat-label">Movements {{ reports_snapshot.window_label }}</p>
+                        <h3>{{ reports_snapshot.stock_in_count }} / {{ reports_snapshot.stock_out_count }}</h3>
+                        <p class="report-stat-meta">In / Out transaction count</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <h3 class="h5 mb-3">Top Stocked Items</h3>
+                    {% if reports_snapshot.top_stocked_items %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th class="text-end">Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in reports_snapshot.top_stocked_items %}
+                                <tr>
+                                    <td class="fw-semibold">{{ item.product.name }}</td>
+                                    <td><span class="badge text-bg-light border">{{ item.product.sku }}</span></td>
+                                    <td class="text-end">{{ item.quantity }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-secondary mb-0">No stocked items available yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <h3 class="h5 mb-3">Low Stock Watchlist</h3>
+                    {% if reports_snapshot.low_stock_items %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-end">Quantity</th>
+                                    <th class="text-end">Reorder Level</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in reports_snapshot.low_stock_items %}
+                                <tr>
+                                    <td class="fw-semibold">{{ item.product.name }}</td>
+                                    <td class="text-end">{{ item.quantity }}</td>
+                                    <td class="text-end">{{ item.reorder_level }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-secondary mb-0">No low stock items right now.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <h3 class="h5 mb-3">Recent Stock Movements</h3>
+                    {% if reports_snapshot.recent_movements %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Type</th>
+                                    <th class="text-end">Qty</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for movement in reports_snapshot.recent_movements %}
+                                <tr>
+                                    <td class="fw-semibold">{{ movement.product.name }}</td>
+                                    <td>
+                                        {% if movement.movement_type == 'IN' %}
+                                        <span class="badge text-bg-success">{{ movement.get_movement_type_display }}</span>
+                                        {% else %}
+                                        <span class="badge text-bg-danger">{{ movement.get_movement_type_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">{{ movement.quantity }}</td>
+                                    <td>{{ movement.created_at|date:"M d, Y H:i" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-secondary mb-0">No movement history is available yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <h3 class="h5 mb-3">Category Coverage</h3>
+                    {% if reports_snapshot.category_breakdown %}
+                    <div class="vstack gap-3">
+                        {% for category in reports_snapshot.category_breakdown %}
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-semibold">{{ category.name }}</span>
+                                <span class="text-secondary small">{{ category.product_count }} product{{ category.product_count|pluralize }}</span>
+                            </div>
+                            <div class="progress report-progress" role="progressbar" aria-valuemin="0" aria-valuemax="{{ reports_snapshot.total_products }}" aria-valuenow="{{ category.product_count }}">
+                                <div class="progress-bar" style="width: {% widthratio category.product_count reports_snapshot.total_products 100 %}%"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-secondary mb-0">No category distribution available yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

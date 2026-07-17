@@ -1,0 +1,33 @@
+.product-page .page-link,
+.product-page .page-link:hover {
+    color: #1d4ed8;
+}
+
+.product-list-page .table td,
+.product-list-page .table th,
+.product-page .table td,
+.product-page .table th {
+    white-space: nowrap;
+}
+
+.product-form .form-label {
+    font-weight: 600;
+}
+
+.product-confirm-page .alert {
+    border-radius: 1rem;
+}
+
+.product-form .btn-outline-primary {
+    white-space: nowrap;
+}
+
+.purchase-order-items-table th,
+.purchase-order-items-table td {
+    min-width: 10rem;
+}
+
+.purchase-order-items-table th:last-child,
+.purchase-order-items-table td:last-child {
+    min-width: 6rem;
+}

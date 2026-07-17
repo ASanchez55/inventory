@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Stock Movements{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/inventory.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="card border-0 shadow-sm rounded-4 overflow-hidden inventory-page">
+    <div class="card-body p-4 p-lg-5">
+        {% include 'includes/page_header.html' with kicker='Stock' title='Stock Movements' description='Review inventory adjustments, references, and the user behind each stock change.' %}
+
+        <div class="inline-actions mb-4">
+            <a href="{% url 'inventory_app:stock_movement_export' %}{% if pagination_query %}?{{ pagination_query }}{% endif %}"
+                class="btn btn-outline-success rounded-pill px-4">
+                Export CSV
+            </a>
+        </div>
+
+        <form method="get" class="row g-3 align-items-end mb-4">
+            <div class="col-12 col-lg-6">
+                <label for="search" class="form-label fw-semibold">Search</label>
+                <input id="search" type="text" name="search" class="form-control"
+                    placeholder="Search by product, SKU, reference, or user" value="{{ search }}">
+            </div>
+
+            <div class="col-12 col-lg-3 d-grid gap-2">
+                <button type="submit" class="btn btn-dark">Apply</button>
+                <a href="{% url 'inventory_app:stock_movement_list' %}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+
+        {% if movements %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Product</th>
+                        <th>SKU</th>
+                        <th>Type</th>
+                        <th>Quantity</th>
+                        <th>Reference</th>
+                        <th>User</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in movements %}
+                    <tr>
+                        <td class="fw-semibold">{{ item.product.name }}</td>
+                        <td><span class="badge text-bg-light border">{{ item.product.sku }}</span></td>
+                        <td>
+                            {% if item.movement_type == 'IN' %}
+                            <span class="badge text-bg-success">{{ item.get_movement_type_display }}</span>
+                            {% else %}
+                            <span class="badge text-bg-danger">{{ item.get_movement_type_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.reference|default:"-" }}</td>
+                        <td>
+                            {% if item.user %}
+                            {{ item.user.get_full_name|default:item.user.username }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>{{ item.created_at|date:"M d, Y H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include 'includes/pagination.html' with aria_label='Stock movements pagination' %}
+        {% else %}
+        <div class="text-center py-5">
+            <h3 class="h5 mb-2">No stock movements found</h3>
+            <p class="text-secondary mb-0">
+                {% if search %}
+                Try a different search to find the movement you need.
+                {% else %}
+                Stock changes will appear here once products start moving in or out.
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

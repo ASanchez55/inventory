@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Suppliers{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/products.css' %}">
+{% endblock %}
+
+{% block content %}
+{% url 'products:supplier_add' as supplier_add_url %}
+<section class="card border-0 shadow-sm rounded-4 overflow-hidden product-list-page">
+    <div class="card-body p-4 p-lg-5">
+        {% include 'includes/page_header.html' with kicker='Partners' title='Suppliers' description='Track supplier contacts, lead times, and sourcing notes for your products.' action_url=supplier_add_url action_label='Add Supplier' %}
+
+        <div class="inline-actions mb-4">
+            <a href="{% url 'products:supplier_export' %}{% if pagination_query %}?{{ pagination_query }}{% endif %}"
+                class="btn btn-outline-success rounded-pill px-4">
+                Export CSV
+            </a>
+        </div>
+
+        <form method="get" class="row g-3 align-items-end mb-4">
+            <div class="col-12 col-lg-6">
+                <label for="search" class="form-label fw-semibold">Search</label>
+                <input id="search" type="text" name="search" class="form-control"
+                    placeholder="Search by name, contact, email, or phone" value="{{ search }}">
+            </div>
+
+            <div class="col-12 col-lg-3 d-grid gap-2">
+                <button type="submit" class="btn btn-dark">Apply</button>
+                <a href="{% url 'products:supplier_list' %}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+
+        {% if suppliers %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Contact Person</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th class="text-end">Lead Time</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for supplier in suppliers %}
+                    <tr>
+                        <td class="fw-semibold">{{ supplier.name }}</td>
+                        <td>{{ supplier.contact_person|default:'-' }}</td>
+                        <td>{{ supplier.email|default:'-' }}</td>
+                        <td>{{ supplier.phone|default:'-' }}</td>
+                        <td class="text-end">{{ supplier.lead_time_days }} day{{ supplier.lead_time_days|pluralize }}</td>
+                        <td class="text-end">
+                            <div class="inline-actions justify-content-end">
+                                <a href="{% url 'products:supplier_edit' supplier.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <a href="{% url 'products:supplier_delete' supplier.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% include 'includes/pagination.html' with aria_label='Suppliers pagination' %}
+        {% else %}
+        <div class="text-center py-5">
+            <h3 class="h5 mb-2">No suppliers found</h3>
+            <p class="text-secondary mb-4">
+                {% if search %}
+                Try a different search or add a new supplier.
+                {% else %}
+                Add suppliers to track sourcing details for your products.
+                {% endif %}
+            </p>
+            <a href="{% url 'products:supplier_add' %}" class="btn btn-primary rounded-pill px-4">Add Supplier</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
